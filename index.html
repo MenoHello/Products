@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>MenoHello Product Grid</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #ffe9e5;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+    }
+    label {
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-bottom: 12px;
+      display: block;
+    }
+    select {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 24px;
+      width: 100%;
+      max-width: 400px;
+      font-size: 1rem;
+      font-family: 'Poppins', sans-serif;
+      background: white;
+      color: #333;
+    }
+    #product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+    .product-card {
+      background: white;
+      padding: 16px;
+      border-radius: 8px;
+      text-align: center;
+    }
+    .product-card img {
+      max-width: 100%;
+      border-radius: 6px;
+    }
+    .product-card h3 {
+      margin: 12px 0 8px;
+      font-weight: 700;
+    }
+    .product-card p.description {
+      font-size: 0.9rem;
+      color: #555;
+      min-height: 3em;
+    }
+    .product-card p.price {
+      font-weight: 600;
+      margin: 8px 0;
+    }
+    .product-card a {
+      display: inline-block;
+      margin-top: 12px;
+      background-color: #ffa798;
+      color: #fff;
+      padding: 10px 20px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <label for="categoryFilter">Filter by Category:</label>
+  <select id="categoryFilter">
+    <option value="All">All Categories</option>
+    <option>Balance Your Hormones</option>
+    <option>Bone and Muscle Health</option>
+    <option>Brain Fog and Memory</option>
+    <option>Gut Health</option>
+    <option>Hair and Nails</option>
+    <option>Headaches and Migraines</option>
+    <option>Hot Flash and Night Sweat Relief</option>
+    <option>Improve Energy</option>
+    <option>Joint Pain, Inflammation and Immune Health</option>
+    <option>Mood Changes</option>
+    <option>Skin Solutions</option>
+    <option>Sleep Products</option>
+    <option>Stay Fresh</option>
+    <option>Stress Relief</option>
+    <option>Vaginal Health</option>
+  </select>
+
+  <div id="product-grid"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <script>
+    const sheetId = '1a3tUL0Te-nzVrraDE3WetntJpdITpoDO7V4nFV6jr6I';
+    const gid = '0';
+
+    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+
+    let products = [];
+
+    fetch(csvUrl)
+      .then(response => response.text())
+      .then(csvText => {
+        const data = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+        products = data.data.filter(p => p.productname);
+        displayProducts(products);
+      })
+      .catch(error => {
+        console.error('Error loading CSV:', error);
+        document.getElementById('product-grid').innerHTML = '<p style="color:red;">Failed to load products.</p>';
+      });
+
+    function displayProducts(items) {
+      const container = document.getElementById('product-grid');
+      container.innerHTML = '';
+      items.forEach(product => {
+        const price = product.approxprice?.trim() || 'N/A';
+        const card = document.createElement('div');
+        card.className = 'product-card';
+
+        card.innerHTML = `
+          <img src="${product.imageurl}" alt="${product.productname}" />
+          <h3>${product.productname}</h3>
+          <p class="description">${product.description}</p>
+          <p class="price">Price: ${price}</p>
+          <a href="${product.amazonlink}" target="_blank" rel="noopener">Shop Now</a>
+        `;
+
+        container.appendChild(card);
+      });
+    }
+
+    document.getElementById('categoryFilter').addEventListener('change', (e) => {
+      const selected = e.target.value;
+      if(selected === 'All') {
+        displayProducts(products);
+      } else {
+        displayProducts(products.filter(p => p.category === selected));
+      }
+    });
+  </script>
+</body>
+</html>
