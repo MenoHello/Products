@@ -10,20 +10,29 @@
       font-family: 'Poppins', sans-serif;
       background: #ffe9e5;
       margin: 0;
-      padding: 20px;
+      padding: 0;
       min-height: 100vh;
     }
+
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: #ffe9e5;
+      padding: 20px;
+    }
+
     label {
       font-weight: 600;
       font-size: 1.1rem;
       margin-bottom: 12px;
       display: block;
     }
+
     select {
       padding: 8px 12px;
       border-radius: 6px;
       border: none;
-      margin-bottom: 24px;
       width: 100%;
       max-width: 400px;
       font-size: 1rem;
@@ -31,34 +40,51 @@
       background: white;
       color: #333;
     }
+
     #product-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px;
       gap: 24px;
     }
+
+    @media (min-width: 1200px) {
+      #product-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+
     .product-card {
       background: white;
       padding: 16px;
       border-radius: 8px;
       text-align: center;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
     }
+
     .product-card img {
       max-width: 100%;
       border-radius: 6px;
     }
+
     .product-card h3 {
       margin: 12px 0 8px;
       font-weight: 700;
     }
+
     .product-card p.description {
       font-size: 0.9rem;
       color: #555;
       min-height: 3em;
     }
+
     .product-card p.price {
       font-weight: 600;
       margin: 8px 0;
     }
+
     .product-card a {
       display: inline-block;
       margin-top: 12px;
@@ -72,25 +98,28 @@
   </style>
 </head>
 <body>
-  <label for="categoryFilter">Filter by Category:</label>
-  <select id="categoryFilter">
-    <option value="All">All Categories</option>
-    <option>Balance Your Hormones</option>
-    <option>Bone and Muscle Health</option>
-    <option>Brain Fog and Memory</option>
-    <option>Gut Health</option>
-    <option>Hair and Nails</option>
-    <option>Headaches and Migraines</option>
-    <option>Hot Flash and Night Sweat Relief</option>
-    <option>Improve Energy</option>
-    <option>Joint Pain, Inflammation and Immune Health</option>
-    <option>Mood Changes</option>
-    <option>Skin Solutions</option>
-    <option>Sleep Products</option>
-    <option>Stay Fresh</option>
-    <option>Stress Relief</option>
-    <option>Vaginal Health</option>
-  </select>
+
+  <div class="header">
+    <label for="categoryFilter">Filter by Category:</label>
+    <select id="categoryFilter">
+      <option value="All">All Categories</option>
+      <option>Balance Your Hormones</option>
+      <option>Bone and Muscle Health</option>
+      <option>Brain Fog and Memory</option>
+      <option>Gut Health</option>
+      <option>Hair and Nails</option>
+      <option>Headaches and Migraines</option>
+      <option>Hot Flash and Night Sweat Relief</option>
+      <option>Improve Energy</option>
+      <option>Joint Pain, Inflammation and Immune Health</option>
+      <option>Mood Changes</option>
+      <option>Skin Solutions</option>
+      <option>Sleep Products</option>
+      <option>Stay Fresh</option>
+      <option>Stress Relief</option>
+      <option>Vaginal Health</option>
+    </select>
+  </div>
 
   <div id="product-grid"></div>
 
@@ -98,9 +127,7 @@
   <script>
     const sheetId = '1a3tUL0Te-nzVrraDE3WetntJpdITpoDO7V4nFV6jr6I';
     const gid = '0';
-
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-
     let products = [];
 
     fetch(csvUrl)
@@ -119,7 +146,7 @@
       const container = document.getElementById('product-grid');
       container.innerHTML = '';
       items.forEach(product => {
-        const price = product.approxprice?.trim() || 'N/A';
+        const price = product.approxprice?.trim() ? `$${product.approxprice.trim()}` : 'N/A';
         const card = document.createElement('div');
         card.className = 'product-card';
 
