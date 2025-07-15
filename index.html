@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MenoHello Product Grid</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -14,47 +16,23 @@
       min-height: 100vh;
     }
     .header {
-      position: sticky;
-      top: 0;
-      z-index: 10;
       background: #ffe9e5;
       padding: 20px;
-    }
-    .filters {
       display: flex;
       flex-wrap: wrap;
       gap: 12px;
       align-items: center;
     }
-    label {
-      font-weight: 600;
-      font-size: 1.1rem;
-    }
-    input[type="text"] {
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: none;
-      font-size: 1rem;
-      width: 200px;
-      font-family: 'Poppins', sans-serif;
-    }
-    select {
+    input[type="text"], select, #favoritesToggle {
       padding: 8px 12px;
       border-radius: 6px;
       border: none;
       font-size: 1rem;
       font-family: 'Poppins', sans-serif;
-      background: white;
-      color: #333;
     }
     #favoritesToggle {
       cursor: pointer;
-      background: #fff;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
       font-weight: 600;
-      font-family: 'Poppins', sans-serif;
     }
     #product-grid {
       display: grid;
@@ -82,7 +60,6 @@
       text-align: center;
       position: relative;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -110,28 +87,20 @@
       top: 16px;
       right: 16px;
       cursor: pointer;
-      font-size: 3rem;
+      font-size: 2rem;
       color: #ccc;
+      transition: color 0.3s ease;
     }
     .favorite.active {
       color: #cd2609;
     }
-    .stars svg {
-      width: 20px;
-      height: 20px;
-      margin: 0 1px;
+    .stars {
+      margin: 10px 0;
+      font-size: 1.2rem;
+      color: gold;
     }
-    .stars .filled {
-      fill: gold;
-    }
-    .stars .half {
-      fill: gold;
-      clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
-    }
-    .stars .outlined {
-      fill: none;
-      stroke: gold;
-      stroke-width: 1.5;
+    .stars i {
+      margin: 0 2px;
     }
     .product-card h3 {
       margin: 12px 0 8px;
@@ -155,151 +124,124 @@
   </style>
 </head>
 <body>
-<!-- body content unchanged -->
-</body>
-</html>
+<div class="header">
+  <select id="categoryFilter">
+    <option value="All">All</option>
+    <option>Balance Your Hormones</option>
+    <option>Bone and Muscle Health</option>
+    <option>Brain Fog and Memory</option>
+    <option>Gut Health</option>
+    <option>Hair and Nails</option>
+    <option>Headaches and Migraines</option>
+    <option>Hot Flash and Night Sweat Relief</option>
+    <option>Improve Energy</option>
+    <option>Joint Pain, Inflammation and Immune Health</option>
+    <option>Mood Changes</option>
+    <option>Skin Solutions</option>
+    <option>Sleep Products</option>
+    <option>Stay Fresh</option>
+    <option>Stress Relief</option>
+    <option>Vaginal Health</option>
+    <option>Books</option>
+  </select>
+  <input type="text" id="searchInput" placeholder="Search products...">
+  <select id="sortPrice">
+    <option value="default">Default</option>
+    <option value="low">Price: Low to High</option>
+    <option value="high">Price: High to Low</option>
+  </select>
+  <button id="favoritesToggle">Show My Favorites</button>
+</div>
+<div id="product-grid"></div>
 
-<body>
-  <div class="header">
-    <div class="filters">
-      <label for="categoryFilter">Category:</label>
-      <select id="categoryFilter">
-        <option value="All">All</option>
-        <option>Balance Your Hormones</option>
-        <option>Bone and Muscle Health</option>
-        <option>Brain Fog and Memory</option>
-        <option>Gut Health</option>
-        <option>Hair and Nails</option>
-        <option>Headaches and Migraines</option>
-        <option>Hot Flash and Night Sweat Relief</option>
-        <option>Improve Energy</option>
-        <option>Joint Pain, Inflammation and Immune Health</option>
-        <option>Mood Changes</option>
-        <option>Skin Solutions</option>
-        <option>Sleep Products</option>
-        <option>Stay Fresh</option>
-        <option>Stress Relief</option>
-        <option>Vaginal Health</option>
-        <option>Books</option>
-      </select>
-      <label for="sortPrice">Sort:</label>
-      <select id="sortPrice">
-        <option value="default">Default</option>
-        <option value="low">Price: Low to High</option>
-        <option value="high">Price: High to Low</option>
-      </select>
-      <input type="text" id="searchInput" placeholder="Search products..." />
-      <button id="favoritesToggle">Show My Favorites</button>
-    </div>
-  </div>
+<script>
+const sheetId = '1a3tUL0Te-nzVrraDE3WetntJpdITpoDO7V4nFV6jr6I';
+const gid = '0';
+const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+let products = [];
+let showingFavorites = false;
 
-  <div id="product-grid"></div>
-  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
-  <script>
-    const sheetId = '1a3tUL0Te-nzVrraDE3WetntJpdITpoDO7V4nFV6jr6I';
-    const gid = '0';
-    const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-    let products = [];
-    let showingFavorites = false;
+fetch(csvUrl)
+  .then(response => response.text())
+  .then(csvText => {
+    const data = Papa.parse(csvText, { header: true, skipEmptyLines: true });
+    products = data.data;
+    renderProducts(products);
+  });
 
-    fetch(csvUrl)
-      .then(response => response.text())
-      .then(csvText => {
-        const data = Papa.parse(csvText, { header: true, skipEmptyLines: true });
-        products = data.data.filter(p => p.productname);
-        loadFavorites();
-        renderProducts(products);
-      });
+function renderProducts(items) {
+  const grid = document.getElementById('product-grid');
+  grid.innerHTML = '';
 
-    function renderProducts(items) {
-      const grid = document.getElementById('product-grid');
-      grid.innerHTML = '';
-      items.forEach(product => {
-        const price = parseFloat(product.approxprice?.trim()) || 0;
-        const badge = product.badge?.trim();
-        const rating = parseFloat(product.ratings) || 0;
-        const favKey = product.productname.replace(/\s+/g, '_');
-        const isFav = localStorage.getItem(favKey) === 'true';
+  items.forEach(product => {
+    const rating = parseFloat(product.ratings) || 0;
+    const fullStars = Math.floor(rating);
+    const halfStar = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
-        const fullStars = Math.floor(rating);
-        const halfStar = rating % 1 >= 0.5;
-        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
+    let starsHtml = '';
+    for (let i = 0; i < fullStars; i++) starsHtml += '<i class="fa-solid fa-star"></i>';
+    if (halfStar) starsHtml += '<i class="fa-solid fa-star-half-stroke"></i>';
+    for (let i = 0; i < emptyStars; i++) starsHtml += '<i class="fa-regular fa-star"></i>';
 
-        let starsHtml = '';
-        for (let i = 0; i < fullStars; i++) starsHtml += '<svg class="filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896l-7.334 4.052 1.4-8.152L.132 9.169l8.2-1.151z"/></svg>';
-        if (halfStar) starsHtml += '<svg class="filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896l-7.334 4.052 1.4-8.152L.132 9.169l8.2-1.151z"/></svg>';
-        for (let i = 0; i < emptyStars; i++) starsHtml += '<svg class="outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896l-7.334 4.052 1.4-8.152L.132 9.169l8.2-1.151z"/></svg>';
+    const badge = product.badge ? `<span class="badge">${product.badge}</span>` : '';
+    const favKey = product.productname.replace(/\s+/g, '_');
+    const isFav = localStorage.getItem(favKey) === 'true';
 
-        const card = document.createElement('div');
-        card.className = 'product-card';
+    const card = document.createElement('div');
+    card.className = 'product-card';
+    card.innerHTML = `
+      ${badge}
+      <span class="favorite ${isFav ? 'active' : ''}" data-key="${favKey}"><i class="${isFav ? 'fa-solid' : 'fa-regular'} fa-heart"></i></span>
+      <img src="${product.imageurl}" alt="${product.productname}" />
+      <h3>${product.productname}</h3>
+      <div class="stars">${starsHtml}</div>
+      <p class="price">$${parseFloat(product.approxprice).toFixed(2)}</p>
+      <a href="${product.amazonlink}" target="_blank">Shop Now</a>
+    `;
+    grid.appendChild(card);
+  });
 
-        card.innerHTML = `
-          ${badge ? `<div class="badge">${badge}</div>` : ''}
-          <div class="favorite ${isFav ? 'active' : ''}" onclick="toggleFavorite(this, '${favKey}')">${isFav ? '♥' : '♡'}</div>
-          <img src="${product.imageurl}" alt="${product.productname}" />
-          <h3>${product.productname}</h3>
-          <div class="stars">${starsHtml}</div>
-          <p class="price">Price: $${price.toFixed(2)}</p>
-          <a href="${product.amazonlink}" onclick="trackClick('${product.productname}')" target="_blank">Shop Now</a>
-        `;
-
-        if (!showingFavorites || isFav) grid.appendChild(card);
-      });
-    }
-
-    function toggleFavorite(el, key) {
-      const isActive = el.classList.toggle('active');
-      el.textContent = isActive ? '♥' : '♡';
-      localStorage.setItem(key, isActive);
+  document.querySelectorAll(".favorite").forEach(el => {
+    el.addEventListener("click", function () {
+      const key = this.dataset.key;
+      const icon = this.querySelector('i');
+      this.classList.toggle("active");
+      icon.classList.toggle("fa-solid");
+      icon.classList.toggle("fa-regular");
+      const isFav = this.classList.contains("active");
+      localStorage.setItem(key, isFav);
       if (showingFavorites) applyFilters();
-    }
-
-    function loadFavorites() {}
-
-    function applyFilters() {
-      const selected = document.getElementById('categoryFilter').value;
-      const sort = document.getElementById('sortPrice').value;
-      const search = document.getElementById('searchInput').value.toLowerCase();
-      let filtered = products;
-
-      if (selected !== 'All') {
-        filtered = filtered.filter(p => p.category === selected);
-      }
-      if (search) {
-        filtered = filtered.filter(p => p.productname.toLowerCase().includes(search));
-      }
-      if (showingFavorites) {
-        filtered = filtered.filter(p => localStorage.getItem(p.productname.replace(/\s+/g, '_')) === 'true');
-      }
-
-      renderProducts(sortByPrice(filtered, sort));
-    }
-
-    function sortByPrice(items, direction) {
-      return [...items].sort((a, b) => {
-        const aPrice = parseFloat(a.approxprice) || 0;
-        const bPrice = parseFloat(b.approxprice) || 0;
-        return direction === 'low' ? aPrice - bPrice : direction === 'high' ? bPrice - aPrice : 0;
-      });
-    }
-
-    function trackClick(productName) {
-      if (typeof gtag === 'function') {
-        gtag('event', 'click', {
-          event_category: 'affiliate_link',
-          event_label: productName
-        });
-      }
-    }
-
-    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
-    document.getElementById('sortPrice').addEventListener('change', applyFilters);
-    document.getElementById('searchInput').addEventListener('input', applyFilters);
-    document.getElementById('favoritesToggle').addEventListener('click', () => {
-      showingFavorites = !showingFavorites;
-      document.getElementById('favoritesToggle').textContent = showingFavorites ? 'Show All' : 'Show My Favorites';
-      applyFilters();
     });
-  </script>
+  });
+}
+
+function applyFilters() {
+  const category = document.getElementById('categoryFilter').value;
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const sort = document.getElementById('sortPrice').value;
+
+  let filtered = products.filter(p => {
+    const matchesCategory = category === 'All' || p.category === category;
+    const matchesSearch = p.productname.toLowerCase().includes(search) || (p.tags && p.tags.toLowerCase().includes(search));
+    const isFav = localStorage.getItem(p.productname.replace(/\s+/g, '_')) === 'true';
+    return matchesCategory && matchesSearch && (!showingFavorites || isFav);
+  });
+
+  if (sort === 'low') filtered.sort((a, b) => parseFloat(a.approxprice) - parseFloat(b.approxprice));
+  if (sort === 'high') filtered.sort((a, b) => parseFloat(b.approxprice) - parseFloat(a.approxprice));
+
+  renderProducts(filtered);
+}
+
+document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+document.getElementById('searchInput').addEventListener('input', applyFilters);
+document.getElementById('sortPrice').addEventListener('change', applyFilters);
+document.getElementById('favoritesToggle').addEventListener('click', () => {
+  showingFavorites = !showingFavorites;
+  document.getElementById('favoritesToggle').textContent = showingFavorites ? 'Show All' : 'Show My Favorites';
+  applyFilters();
+});
+</script>
 </body>
 </html>
