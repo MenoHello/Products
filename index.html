@@ -81,37 +81,39 @@
       text-align: center;
       position: relative;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-      aspect-ratio: 3 / 4;
+      aspect-ratio: 3 / 4.5;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
     }
     .product-card img {
       max-width: 100%;
       height: 160px;
       object-fit: contain;
       border-radius: 6px;
+      margin-top: 30px;
     }
     .badge {
       position: absolute;
-      top: -10px;
+      top: 8px;
       left: 8px;
       background: #8e599c;
       color: white;
-      padding: 8px 12px;
+      padding: 10px 16px;
       border-radius: 6px;
       font-size: 1rem;
       font-weight: 600;
-      transform: translateY(-50%);
     }
     .favorite {
       position: absolute;
-      top: -10px;
+      top: 8px;
       right: 8px;
       cursor: pointer;
       font-size: 3rem;
       color: #ccc;
-      transform: translateY(-50%);
     }
     .favorite.active {
-      color: red;
+      color: #cd2609;
     }
     .stars svg {
       width: 20px;
@@ -122,7 +124,8 @@
       fill: gold;
     }
     .stars .half {
-      fill: url(#half-grad);
+      fill: gold;
+      clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);
     }
     .stars .outlined {
       fill: none;
@@ -170,6 +173,7 @@
         <option>Stay Fresh</option>
         <option>Stress Relief</option>
         <option>Vaginal Health</option>
+        <option>Books</option>
       </select>
       <label for="sortPrice">Sort:</label>
       <select id="sortPrice">
@@ -183,15 +187,6 @@
   </div>
 
   <div id="product-grid"></div>
-  <svg width="0" height="0">
-    <defs>
-      <linearGradient id="half-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-        <stop offset="50%" stop-color="gold"/>
-        <stop offset="50%" stop-color="transparent"/>
-      </linearGradient>
-    </defs>
-  </svg>
-
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
   <script>
     const sheetId = '1a3tUL0Te-nzVrraDE3WetntJpdITpoDO7V4nFV6jr6I';
@@ -225,7 +220,7 @@
 
         let starsHtml = '';
         for (let i = 0; i < fullStars; i++) starsHtml += '<svg class="filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896l-7.334 4.052 1.4-8.152L.132 9.169l8.2-1.151z"/></svg>';
-        if (halfStar) starsHtml += '<svg class="half" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896V.587z"/></svg>';
+        if (halfStar) starsHtml += '<svg class="filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="clip-path: polygon(0 0, 50% 0, 50% 100%, 0 100%);"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896l-7.334 4.052 1.4-8.152L.132 9.169l8.2-1.151z"/></svg>';
         for (let i = 0; i < emptyStars; i++) starsHtml += '<svg class="outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896l-7.334 4.052 1.4-8.152L.132 9.169l8.2-1.151z"/></svg>';
 
         const card = document.createElement('div');
@@ -252,9 +247,7 @@
       if (showingFavorites) applyFilters();
     }
 
-    function loadFavorites() {
-      // handled in renderProducts
-    }
+    function loadFavorites() {}
 
     function applyFilters() {
       const selected = document.getElementById('categoryFilter').value;
