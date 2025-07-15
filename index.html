@@ -151,14 +151,16 @@
     <option value="high">Price: High to Low</option>
   </select>
   <button id="favoritesToggle">Show My Favorites</button>
-</div>
 <div id="product-grid"></div>
 
 <script>
 const sheetId = '1a3tUL0Te-nzVrraDE3WetntJpdITpoDO7V4nFV6jr6I';
 const gid = '0';
 const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
+const backendUrl = 'https://script.google.com/macros/s/AKfycbyAZjgar2keUXzpJz2LWJXJu45ZtENu26YhlZgmo42Mf64NnBAybPRmGxtOZlKKjAg8/exec'; // <-- Replace with your deployed Apps Script Web App URL
+const userId = 'user123'; // Customize if you have a real login system
 let products = [];
+let favorites = [];
 let showingFavorites = false;
 
 fetch(csvUrl)
@@ -166,8 +168,20 @@ fetch(csvUrl)
   .then(csvText => {
     const data = Papa.parse(csvText, { header: true, skipEmptyLines: true });
     products = data.data;
-    renderProducts(products);
+    fetchFavorites().then(() => renderProducts(products));
   });
+
+function fetchFavorites() {
+  return fetch(`${backendUrl}?userId=${userId}`)
+    .then(res => res.json())
+    .then(data => { favorites = data; });
+}
+
+function updateFavoriteOnBackend(productName, action) {
+  return fetch(`${backendUrl}?userId=${userId}&productName=${encodeURIComponent(productName)}&action=${action}`, {
+    method: 'POST'
+  });
+}
 
 function renderProducts(items) {
   const grid = document.getElementById('product-grid');
@@ -185,8 +199,8 @@ function renderProducts(items) {
     for (let i = 0; i < emptyStars; i++) starsHtml += '<i class="fa-regular fa-star"></i>';
 
     const badge = product.badge ? `<span class="badge">${product.badge}</span>` : '';
-    const favKey = product.productname.replace(/\s+/g, '_');
-    const isFav = localStorage.getItem(favKey) === 'true';
+    const favKey = product.productname;
+    const isFav = favorites.includes(favKey);
 
     const card = document.createElement('div');
     card.className = 'product-card';
@@ -206,12 +220,12 @@ function renderProducts(items) {
     el.addEventListener("click", function () {
       const key = this.dataset.key;
       const icon = this.querySelector('i');
-      this.classList.toggle("active");
-      icon.classList.toggle("fa-solid");
-      icon.classList.toggle("fa-regular");
-      const isFav = this.classList.contains("active");
-      localStorage.setItem(key, isFav);
-      if (showingFavorites) applyFilters();
+      const isActive = this.classList.toggle("active");
+      icon.classList.toggle("fa-solid", isActive);
+      icon.classList.toggle("fa-regular", !isActive);
+
+      const action = isActive ? 'add' : 'remove';
+      updateFavoriteOnBackend(key, action);
     });
   });
 }
@@ -224,7 +238,7 @@ function applyFilters() {
   let filtered = products.filter(p => {
     const matchesCategory = category === 'All' || p.category === category;
     const matchesSearch = p.productname.toLowerCase().includes(search) || (p.tags && p.tags.toLowerCase().includes(search));
-    const isFav = localStorage.getItem(p.productname.replace(/\s+/g, '_')) === 'true';
+    const isFav = favorites.includes(p.productname);
     return matchesCategory && matchesSearch && (!showingFavorites || isFav);
   });
 
