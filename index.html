@@ -47,9 +47,18 @@
       background: white;
       color: #333;
     }
+    #favoritesToggle {
+      cursor: pointer;
+      background: #fff;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-family: 'Poppins', sans-serif;
+    }
     #product-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       max-width: 1440px;
       margin: 0 auto;
       padding: 20px;
@@ -72,41 +81,50 @@
       text-align: center;
       position: relative;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      aspect-ratio: 3 / 4;
     }
     .product-card img {
       max-width: 100%;
+      height: 160px;
+      object-fit: contain;
       border-radius: 6px;
     }
     .badge {
       position: absolute;
-      top: 8px;
+      top: -10px;
       left: 8px;
       background: #8e599c;
       color: white;
-      padding: 6px 10px;
+      padding: 8px 12px;
       border-radius: 6px;
-      font-size: 0.9rem;
+      font-size: 1rem;
       font-weight: 600;
+      transform: translateY(-50%);
     }
     .favorite {
       position: absolute;
-      top: 8px;
+      top: -10px;
       right: 8px;
       cursor: pointer;
-      font-size: 2.2rem;
+      font-size: 3rem;
       color: #ccc;
+      transform: translateY(-50%);
     }
     .favorite.active {
       color: red;
-      content: '\2764';
     }
     .stars svg {
       width: 20px;
       height: 20px;
       margin: 0 1px;
+    }
+    .stars .filled {
       fill: gold;
     }
-    .stars svg.outlined {
+    .stars .half {
+      fill: url(#half-grad);
+    }
+    .stars .outlined {
       fill: none;
       stroke: gold;
       stroke-width: 1.5;
@@ -160,10 +178,19 @@
         <option value="high">Price: High to Low</option>
       </select>
       <input type="text" id="searchInput" placeholder="Search products..." />
+      <button id="favoritesToggle">Show My Favorites</button>
     </div>
   </div>
 
   <div id="product-grid"></div>
+  <svg width="0" height="0">
+    <defs>
+      <linearGradient id="half-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="50%" stop-color="gold"/>
+        <stop offset="50%" stop-color="transparent"/>
+      </linearGradient>
+    </defs>
+  </svg>
 
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
   <script>
@@ -171,6 +198,7 @@
     const gid = '0';
     const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
     let products = [];
+    let showingFavorites = false;
 
     fetch(csvUrl)
       .then(response => response.text())
@@ -196,8 +224,8 @@
         const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
 
         let starsHtml = '';
-        for (let i = 0; i < fullStars; i++) starsHtml += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896l-7.334 4.052 1.4-8.152L.132 9.169l8.2-1.151z"/></svg>';
-        if (halfStar) starsHtml += '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896V.587z"/></svg>';
+        for (let i = 0; i < fullStars; i++) starsHtml += '<svg class="filled" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896l-7.334 4.052 1.4-8.152L.132 9.169l8.2-1.151z"/></svg>';
+        if (halfStar) starsHtml += '<svg class="half" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896V.587z"/></svg>';
         for (let i = 0; i < emptyStars; i++) starsHtml += '<svg class="outlined" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 .587l3.668 7.431 8.2 1.151-5.934 5.627 1.4 8.152L12 18.896l-7.334 4.052 1.4-8.152L.132 9.169l8.2-1.151z"/></svg>';
 
         const card = document.createElement('div');
@@ -205,7 +233,7 @@
 
         card.innerHTML = `
           ${badge ? `<div class="badge">${badge}</div>` : ''}
-          <div class="favorite ${isFav ? 'active' : ''}" onclick="toggleFavorite(this, '${favKey}')">♡</div>
+          <div class="favorite ${isFav ? 'active' : ''}" onclick="toggleFavorite(this, '${favKey}')">${isFav ? '♥' : '♡'}</div>
           <img src="${product.imageurl}" alt="${product.productname}" />
           <h3>${product.productname}</h3>
           <div class="stars">${starsHtml}</div>
@@ -213,22 +241,20 @@
           <a href="${product.amazonlink}" onclick="trackClick('${product.productname}')" target="_blank">Shop Now</a>
         `;
 
-        grid.appendChild(card);
+        if (!showingFavorites || isFav) grid.appendChild(card);
       });
     }
 
     function toggleFavorite(el, key) {
-      const active = el.classList.toggle('active');
-      localStorage.setItem(key, active);
+      const isActive = el.classList.toggle('active');
+      el.textContent = isActive ? '♥' : '♡';
+      localStorage.setItem(key, isActive);
+      if (showingFavorites) applyFilters();
     }
 
     function loadFavorites() {
-      // run once on load to mark favorites
+      // handled in renderProducts
     }
-
-    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
-    document.getElementById('sortPrice').addEventListener('change', applyFilters);
-    document.getElementById('searchInput').addEventListener('input', applyFilters);
 
     function applyFilters() {
       const selected = document.getElementById('categoryFilter').value;
@@ -239,9 +265,11 @@
       if (selected !== 'All') {
         filtered = filtered.filter(p => p.category === selected);
       }
-
       if (search) {
         filtered = filtered.filter(p => p.productname.toLowerCase().includes(search));
+      }
+      if (showingFavorites) {
+        filtered = filtered.filter(p => localStorage.getItem(p.productname.replace(/\s+/g, '_')) === 'true');
       }
 
       renderProducts(sortByPrice(filtered, sort));
@@ -263,6 +291,15 @@
         });
       }
     }
+
+    document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+    document.getElementById('sortPrice').addEventListener('change', applyFilters);
+    document.getElementById('searchInput').addEventListener('input', applyFilters);
+    document.getElementById('favoritesToggle').addEventListener('click', () => {
+      showingFavorites = !showingFavorites;
+      document.getElementById('favoritesToggle').textContent = showingFavorites ? 'Show All' : 'Show My Favorites';
+      applyFilters();
+    });
   </script>
 </body>
 </html>
