@@ -22,6 +22,9 @@
       flex-wrap: wrap;
       gap: 12px;
       align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
     input[type="text"], select, #favoritesToggle {
       padding: 8px 12px;
@@ -74,13 +77,20 @@
     .badge {
       position: absolute;
       top: 16px;
-      left: 16px;
+      left: 0;
       background: #8e599c;
       color: white;
-      padding: 10px 16px;
-      border-radius: 6px;
+      padding: 8px 16px;
+      border-top-right-radius: 6px;
+      border-bottom-right-radius: 6px;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
       font-size: 1rem;
       font-weight: 600;
+      text-transform: capitalize;
+      white-space: nowrap;
+      max-width: 75%;
+      overflow: hidden;
     }
     .favorite {
       position: absolute;
@@ -125,25 +135,7 @@
 </head>
 <body>
 <div class="header">
-  <select id="categoryFilter">
-    <option value="All">All</option>
-    <option>Balance Your Hormones</option>
-    <option>Bone and Muscle Health</option>
-    <option>Brain Fog and Memory</option>
-    <option>Gut Health</option>
-    <option>Hair and Nails</option>
-    <option>Headaches and Migraines</option>
-    <option>Hot Flash and Night Sweat Relief</option>
-    <option>Improve Energy</option>
-    <option>Joint Pain, Inflammation and Immune Health</option>
-    <option>Mood Changes</option>
-    <option>Skin Solutions</option>
-    <option>Sleep Products</option>
-    <option>Stay Fresh</option>
-    <option>Stress Relief</option>
-    <option>Vaginal Health</option>
-    <option>Books</option>
-  </select>
+  <select id="categoryFilter"></select>
   <input type="text" id="searchInput" placeholder="Search products...">
   <select id="sortPrice">
     <option value="default">Default</option>
@@ -151,25 +143,35 @@
     <option value="high">Price: High to Low</option>
   </select>
   <button id="favoritesToggle">Show My Favorites</button>
+</div>
 <div id="product-grid"></div>
 
 <script>
 const sheetId = '1a3tUL0Te-nzVrraDE3WetntJpdITpoDO7V4nFV6jr6I';
 const gid = '0';
 const csvUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${gid}`;
-const backendUrl = 'https://script.google.com/macros/s/AKfycbyAZjgar2keUXzpJz2LWJXJu45ZtENu26YhlZgmo42Mf64NnBAybPRmGxtOZlKKjAg8/exec'; // <-- Replace with your deployed Apps Script Web App URL
-const userId = 'user123'; // Customize if you have a real login system
+const backendUrl = 'https://script.google.com/macros/s/AKfycbyAZjgar2keUXzpJz2LWJXJu45ZtENu26YhlZgmo42Mf64NnBAybPRmGxtOZlKKjAg8/exec';
+const userId = 'user123';
 let products = [];
 let favorites = [];
 let showingFavorites = false;
+let categoriesSet = new Set();
 
 fetch(csvUrl)
   .then(response => response.text())
   .then(csvText => {
     const data = Papa.parse(csvText, { header: true, skipEmptyLines: true });
     products = data.data;
+    products.forEach(p => categoriesSet.add(p.category));
+    setCategoryOptions([...categoriesSet].sort());
     fetchFavorites().then(() => renderProducts(products));
   });
+
+function setCategoryOptions(sortedCategories) {
+  const select = document.getElementById('categoryFilter');
+  select.innerHTML = '<option value="All">All</option>' +
+    sortedCategories.map(cat => `<option>${cat}</option>`).join('');
+}
 
 function fetchFavorites() {
   return fetch(`${backendUrl}?userId=${userId}`)
@@ -178,6 +180,13 @@ function fetchFavorites() {
 }
 
 function updateFavoriteOnBackend(productName, action) {
+  if (typeof gtag === 'function') {
+    gtag('event', 'favorite_toggle', {
+      event_category: 'Favorites',
+      event_label: productName,
+      value: action === 'add' ? 1 : -1
+    });
+  }
   return fetch(`${backendUrl}?userId=${userId}&productName=${encodeURIComponent(productName)}&action=${action}`, {
     method: 'POST'
   });
@@ -211,7 +220,7 @@ function renderProducts(items) {
       <h3>${product.productname}</h3>
       <div class="stars">${starsHtml}</div>
       <p class="price">$${parseFloat(product.approxprice).toFixed(2)}</p>
-      <a href="${product.amazonlink}" target="_blank">Shop Now</a>
+      <a href="${product.amazonlink}" target="_blank" onclick="trackClick('${product.productname}')">Shop Now</a>
     `;
     grid.appendChild(card);
   });
@@ -225,7 +234,11 @@ function renderProducts(items) {
       icon.classList.toggle("fa-regular", !isActive);
 
       const action = isActive ? 'add' : 'remove';
-      updateFavoriteOnBackend(key, action);
+      updateFavoriteOnBackend(key, action).then(() => {
+        if (showingFavorites) {
+          renderProducts(products.filter(p => favorites.includes(p.productname) || p.productname === key && action === 'add'));
+        }
+      });
     });
   });
 }
@@ -237,7 +250,7 @@ function applyFilters() {
 
   let filtered = products.filter(p => {
     const matchesCategory = category === 'All' || p.category === category;
-    const matchesSearch = p.productname.toLowerCase().includes(search) || (p.tags && p.tags.toLowerCase().includes(search));
+    const matchesSearch = p.productname.toLowerCase().includes(search) || (p.category && p.category.toLowerCase().includes(search)) || (p.tags && p.tags.toLowerCase().includes(search));
     const isFav = favorites.includes(p.productname);
     return matchesCategory && matchesSearch && (!showingFavorites || isFav);
   });
@@ -248,13 +261,22 @@ function applyFilters() {
   renderProducts(filtered);
 }
 
+function trackClick(productName) {
+  if (typeof gtag === 'function') {
+    gtag('event', 'affiliate_click', {
+      event_category: 'Affiliate',
+      event_label: productName
+    });
+  }
+}
+
 document.getElementById('categoryFilter').addEventListener('change', applyFilters);
 document.getElementById('searchInput').addEventListener('input', applyFilters);
 document.getElementById('sortPrice').addEventListener('change', applyFilters);
 document.getElementById('favoritesToggle').addEventListener('click', () => {
   showingFavorites = !showingFavorites;
   document.getElementById('favoritesToggle').textContent = showingFavorites ? 'Show All' : 'Show My Favorites';
-  applyFilters();
+  renderProducts(showingFavorites ? products.filter(p => favorites.includes(p.productname)) : products);
 });
 </script>
 </body>
