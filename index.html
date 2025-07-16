@@ -137,54 +137,74 @@
       }
       
       #product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        padding: 15px;
-        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        padding: 10px;
+        gap: 8px;
       }
       
       .product-card {
-        min-height: 220px;
-        padding: 8px;
+        min-height: 175px; /* 4:5 ratio for 140px width */
+        max-height: 175px;
+        padding: 6px;
+        border-radius: 6px;
       }
       
       .product-card img {
-        height: 45px;
-        margin-top: 25px;
+        height: 35px;
+        margin-top: 15px;
+        margin-bottom: 5px;
       }
       
       .product-card h3 {
-        font-size: 0.75rem;
-        margin: 6px 0 4px;
+        font-size: 0.65rem;
+        margin: 3px 0 2px;
         line-height: 1.1;
+        font-weight: 600;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        text-overflow: ellipsis;
+        height: 22px;
       }
       
       .product-card p.price {
-        font-size: 0.85rem;
-        margin: 4px 0;
+        font-size: 0.75rem;
+        margin: 2px 0;
+        font-weight: 700;
       }
       
       .product-card a {
-        padding: 6px 10px;
-        font-size: 0.75rem;
-        margin-top: 6px;
-        margin-bottom: 6px;
+        padding: 4px 8px;
+        font-size: 0.65rem;
+        margin-top: 4px;
+        margin-bottom: 4px;
+        border-radius: 4px;
+        font-weight: 600;
       }
       
       .stars {
-        margin: 4px 0;
-        font-size: 0.8rem;
+        margin: 2px 0;
+        font-size: 0.65rem;
+      }
+      
+      .stars i {
+        margin: 0 1px;
       }
       
       .badge {
-        font-size: 0.6rem;
-        padding: 3px 6px;
-        max-width: 85%;
+        font-size: 0.55rem;
+        padding: 2px 5px;
+        max-width: 80%;
+        border-top-right-radius: 4px;
+        border-bottom-right-radius: 4px;
+        top: 6px;
       }
       
       .favorite {
-        font-size: 1.2rem;
-        top: 8px;
-        right: 8px;
+        font-size: 1rem;
+        top: 6px;
+        right: 6px;
       }
       
       .header {
