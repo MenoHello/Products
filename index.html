@@ -30,7 +30,6 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       max-width: 1440px;
       margin: 0 auto;
     }
@@ -111,19 +110,54 @@
     
     @media (max-width: 599px) {
       #product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        padding: 20px;
-        gap: 20px;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        padding: 15px;
+        gap: 15px;
+      }
+      
+      .product-card {
+        min-height: 280px;
+        padding: 12px;
       }
       
       .product-card img {
-        height: 80px;
-        margin-top: 30px;
+        height: 60px;
+        margin-top: 35px;
+      }
+      
+      .product-card h3 {
+        font-size: 0.9rem;
+        margin: 8px 0 6px;
+        line-height: 1.2;
+      }
+      
+      .product-card p.price {
+        font-size: 1rem;
+        margin: 6px 0;
+      }
+      
+      .product-card a {
+        padding: 8px 12px;
+        font-size: 0.9rem;
+        margin-top: 8px;
+        margin-bottom: 8px;
+      }
+      
+      .stars {
+        margin: 6px 0;
+        font-size: 1rem;
       }
       
       .badge {
-        font-size: 0.8rem;
-        padding: 6px 12px;
+        font-size: 0.7rem;
+        padding: 4px 8px;
+        max-width: 80%;
+      }
+      
+      .favorite {
+        font-size: 1.5rem;
+        top: 12px;
+        right: 12px;
       }
     }
     
@@ -429,8 +463,11 @@ class ProductGrid {
     const toggle = document.getElementById('favoritesToggle');
     
     if (this.showingFavorites) {
-      toggle.textContent = 'Show All Products';
+      toggle.textContent = 'Back to All Products';
       toggle.classList.add('active');
+      // Reset to "All" tab when showing favorites
+      this.currentCategory = 'All';
+      this.updateActiveTab('All');
     } else {
       toggle.textContent = 'Show My Favorites';
       toggle.classList.remove('active');
@@ -442,9 +479,14 @@ class ProductGrid {
   applyFilters(searchTerm = '') {
     let filtered = [...this.products];
     
-    // Apply category filter
-    if (this.currentCategory !== 'All') {
-      filtered = filtered.filter(p => p.category === this.currentCategory);
+    // Apply favorites filter first (shows all categories when favorites are active)
+    if (this.showingFavorites) {
+      filtered = filtered.filter(p => this.favorites.has(p.productname));
+    } else {
+      // Only apply category filter when not showing favorites
+      if (this.currentCategory !== 'All') {
+        filtered = filtered.filter(p => p.category === this.currentCategory);
+      }
     }
     
     // Apply search filter
@@ -453,11 +495,6 @@ class ProductGrid {
         p.productname.toLowerCase().includes(searchTerm) ||
         p.category.toLowerCase().includes(searchTerm)
       );
-    }
-    
-    // Apply favorites filter
-    if (this.showingFavorites) {
-      filtered = filtered.filter(p => this.favorites.has(p.productname));
     }
     
     this.filteredProducts = filtered;
@@ -504,18 +541,33 @@ class ProductGrid {
     }
     
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.tabs button').forEach(b => {
-        b.classList.remove('active');
-        b.setAttribute('aria-selected', 'false');
-      });
-      btn.classList.add('active');
-      btn.setAttribute('aria-selected', 'true');
+      // Don't allow category switching when showing favorites
+      if (this.showingFavorites) {
+        return;
+      }
       
+      this.updateActiveTab(category);
       this.currentCategory = category;
       this.applyFilters(document.getElementById('searchInput').value);
     });
     
     return btn;
+  }
+  
+  updateActiveTab(activeCategory) {
+    document.querySelectorAll('.tabs button').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    
+    // Find and activate the correct tab
+    const tabs = document.querySelectorAll('.tabs button');
+    tabs.forEach(tab => {
+      if (tab.textContent === activeCategory) {
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+      }
+    });
   }
   
   renderProducts() {
