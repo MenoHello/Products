@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <div id="productsContainer">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MenoHello Product Grid</title>
@@ -755,6 +756,47 @@ class ProductGrid {
 document.addEventListener('DOMContentLoaded', () => {
   new ProductGrid();
 });
+</script>
+</div>
+  <script>
+    // 1. Function to send iframe height to parent
+    function sendIframeHeight() {
+        // You'll need a main container div for your products content
+        const contentContainer = document.getElementById('productsContainer'); 
+        if (contentContainer) {
+            // Calculate scroll height and add a small buffer
+            const height = contentContainer.scrollHeight + 20;
+            
+            // Log the height for debugging
+            console.log('GitHub Page: Sending iframe height:', height);
+            
+            // IMPORTANT: The targetOrigin MUST be your Pixpa domain
+            window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com');
+        }
+    }
+    
+    // 2. Set up the observer and initial call
+    
+    // Call on initial page load
+    window.addEventListener('DOMContentLoaded', () => {
+      sendIframeHeight();
+    });
+
+    // Use a ResizeObserver to automatically send a new height whenever the content size changes
+    const containerToObserve = document.getElementById('productsContainer');
+    if (containerToObserve) {
+        const resizeObserver = new ResizeObserver(entries => {
+            console.log('GitHub Page: ResizeObserver detected change, requesting new height.');
+            sendIframeHeight();
+        });
+        resizeObserver.observe(containerToObserve);
+    }
+    
+    // Fallback for slower-loading content like images
+    window.addEventListener('load', () => {
+      console.log('GitHub Page: window loaded, sending initial height.');
+      sendIframeHeight();
+    });
 </script>
 </body>
 </html>
