@@ -30,6 +30,7 @@
       position: sticky;
       top: 0;
       z-index: 1000;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       max-width: 1440px;
       margin: 0 auto;
     }
@@ -64,7 +65,6 @@
       color: white;
     }
     
-    /* Desktop tabs */
     .tabs {
       display: flex;
       flex-wrap: wrap;
@@ -77,6 +77,43 @@
       z-index: 999;
       max-width: 1440px;
       margin: 0 auto;
+    }
+    
+    .category-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .category-dropdown select {
+      background: white;
+      border: 1px solid #ffa798;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      appearance: none;
+      padding-right: 40px;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 12px;
+    }
+    
+    .category-dropdown select:hover {
+      background-color: #ffd2cb;
+    }
+    
+    .category-dropdown select:focus {
+      outline: none;
+      border-color: #ffa798;
+    }
+    
+    .category-dropdown select:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: #f5f5f5;
     }
     
     .tabs button {
@@ -100,23 +137,6 @@
       color: white;
     }
     
-    /* Mobile category dropdown */
-    .category-dropdown-container {
-      display: none;
-      background: #ffe9e5;
-      padding: 10px 15px;
-      position: sticky;
-      top: 70px;
-      z-index: 999;
-      max-width: 1440px;
-      margin: 0 auto;
-    }
-    
-    #categoryDropdown {
-      width: 100%;
-      max-width: 200px;
-    }
-    
     #product-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -124,96 +144,6 @@
       margin: 0 auto;
       padding: 40px;
       gap: 30px;
-    }
-    
-    /* Mobile styles */
-    @media (max-width: 768px) {
-      .tabs {
-        display: none;
-      }
-      
-      .category-dropdown-container {
-        display: block;
-      }
-      
-      #product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        padding: 15px;
-        gap: 12px;
-      }
-      
-      .product-card {
-        min-height: 220px;
-        padding: 8px;
-      }
-      
-      .product-card img {
-        height: 45px;
-        margin-top: 25px;
-      }
-      
-      .product-card h3 {
-        font-size: 0.75rem;
-        margin: 6px 0 4px;
-        line-height: 1.1;
-      }
-      
-      .product-card p.price {
-        font-size: 0.85rem;
-        margin: 4px 0;
-      }
-      
-      .product-card a {
-        padding: 6px 10px;
-        font-size: 0.75rem;
-        margin-top: 6px;
-        margin-bottom: 6px;
-      }
-      
-      .stars {
-        margin: 4px 0;
-        font-size: 0.8rem;
-      }
-      
-      .badge {
-        font-size: 0.6rem;
-        padding: 3px 6px;
-        max-width: 85%;
-      }
-      
-      .favorite {
-        font-size: 1.2rem;
-        top: 8px;
-        right: 8px;
-      }
-      
-      .header {
-        padding: 10px 15px;
-        gap: 10px;
-      }
-      
-      .header input, .header select, .header button {
-        font-size: 0.9rem;
-        padding: 6px 10px;
-      }
-    }
-    
-    /* Tablet styles */
-    @media (min-width: 769px) and (max-width: 1024px) {
-      #product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        padding: 25px;
-        gap: 20px;
-      }
-      
-      .product-card {
-        min-height: 320px;
-      }
-      
-      .product-card img {
-        height: 120px;
-        margin-top: 45px;
-      }
     }
     
     .product-card {
@@ -250,7 +180,7 @@
     
     .badge {
       position: absolute;
-      top: 16px;
+      top: 2px;
       left: 0;
       background: #8e599c;
       color: white;
@@ -345,6 +275,78 @@
       color: #666;
       font-size: 1.1rem;
     }
+    
+    /* Mobile-specific styles */
+    @media (max-width: 599px) {
+      #product-grid {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        padding: 15px;
+        gap: 15px;
+      }
+      
+      .product-card {
+        min-height: 0;
+        aspect-ratio: 4/5;
+        padding: 8px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      
+      .product-card img {
+        height: 50px;
+        margin-top: 20px;
+        margin-bottom: 5px;
+      }
+      
+      .product-card:hover img {
+        transform: none;
+      }
+      
+      .badge {
+        font-size: 0.6rem;
+        padding: 3px 6px;
+        max-width: 80%;
+        top: 1px;
+      }
+      
+      .favorite {
+        font-size: 1.2rem;
+        top: 8px;
+        right: 8px;
+      }
+      
+      .product-card h3 {
+        display: none;
+      }
+      
+      .stars {
+        margin: 3px 0;
+        font-size: 0.8rem;
+      }
+      
+      .stars i {
+        margin: 0 1px;
+      }
+      
+      .product-card p.price {
+        font-size: 0.9rem;
+        margin: 3px 0;
+        font-weight: 700;
+      }
+      
+      .product-card a {
+        margin-top: 5px;
+        margin-bottom: 5px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
+        border-radius: 4px;
+      }
+      
+      .product-card a:hover {
+        transform: none;
+      }
+    }
   </style>
 </head>
 <body>
@@ -357,17 +359,7 @@
   </select>
   <button id="favoritesToggle" aria-label="Toggle favorites view">Show My Favorites</button>
 </div>
-
-<!-- Desktop tabs -->
 <div class="tabs" id="categoryTabs" role="tablist"></div>
-
-<!-- Mobile dropdown -->
-<div class="category-dropdown-container">
-  <select id="categoryDropdown" aria-label="Select category">
-    <option value="All">All Categories</option>
-  </select>
-</div>
-
 <div id="product-grid" role="main"></div>
 
 <script>
@@ -392,7 +384,6 @@ class ProductGrid {
       await this.loadProducts();
       this.setupEventListeners();
       this.renderTabs();
-      this.renderCategoryDropdown();
       this.renderProducts();
     } catch (error) {
       console.error('Error loading products:', error);
@@ -403,7 +394,6 @@ class ProductGrid {
       this.loadSampleData();
       this.setupEventListeners();
       this.renderTabs();
-      this.renderCategoryDropdown();
       this.renderProducts();
     }
   }
@@ -434,33 +424,6 @@ class ProductGrid {
         approxprice: 39.99,
         ratings: 5.0,
         imageurl: "https://via.placeholder.com/200x200/ffa798/white?text=Product+3",
-        amazonlink: "#",
-        badge: ""
-      },
-      {
-        productname: "Sample Product 4",
-        category: "Wellness",
-        approxprice: 24.99,
-        ratings: 4.2,
-        imageurl: "https://via.placeholder.com/200x200/ffa798/white?text=Product+4",
-        amazonlink: "#",
-        badge: ""
-      },
-      {
-        productname: "Sample Product 5",
-        category: "Beauty",
-        approxprice: 34.99,
-        ratings: 4.8,
-        imageurl: "https://via.placeholder.com/200x200/8e599c/white?text=Product+5",
-        amazonlink: "#",
-        badge: "popular"
-      },
-      {
-        productname: "Sample Product 6",
-        category: "Wellness",
-        approxprice: 15.99,
-        ratings: 3.9,
-        imageurl: "https://via.placeholder.com/200x200/ffa798/white?text=Product+6",
         amazonlink: "#",
         badge: ""
       }
@@ -524,12 +487,10 @@ class ProductGrid {
     const searchInput = document.getElementById('searchInput');
     const sortSelect = document.getElementById('sortPrice');
     const favoritesToggle = document.getElementById('favoritesToggle');
-    const categoryDropdown = document.getElementById('categoryDropdown');
     
     searchInput.addEventListener('input', this.debounce(() => this.handleSearch(), 300));
     sortSelect.addEventListener('change', () => this.handleSort());
     favoritesToggle.addEventListener('click', () => this.toggleFavorites());
-    categoryDropdown.addEventListener('change', () => this.handleCategoryChange());
   }
   
   debounce(func, wait) {
@@ -554,31 +515,22 @@ class ProductGrid {
     this.applySort(sortValue);
   }
   
-  handleCategoryChange() {
-    if (this.showingFavorites) {
-      return;
-    }
-    
-    const selectedCategory = document.getElementById('categoryDropdown').value;
-    this.currentCategory = selectedCategory;
-    this.updateActiveTab(selectedCategory);
-    this.applyFilters(document.getElementById('searchInput').value);
-  }
-  
   toggleFavorites() {
     this.showingFavorites = !this.showingFavorites;
     const toggle = document.getElementById('favoritesToggle');
+    const categoryDropdown = document.getElementById('categoryDropdown');
     
     if (this.showingFavorites) {
       toggle.textContent = 'Back to All Products';
       toggle.classList.add('active');
-      // Reset to "All" tab when showing favorites
+      // Switch to "All" category when showing favorites
       this.currentCategory = 'All';
-      this.updateActiveTab('All');
-      this.updateDropdownSelection('All');
+      categoryDropdown.value = 'All';
+      categoryDropdown.disabled = true;
     } else {
       toggle.textContent = 'Show My Favorites';
       toggle.classList.remove('active');
+      categoryDropdown.disabled = false;
     }
     
     this.applyFilters();
@@ -587,22 +539,23 @@ class ProductGrid {
   applyFilters(searchTerm = '') {
     let filtered = [...this.products];
     
-    // Apply favorites filter first (shows all categories when favorites are active)
-    if (this.showingFavorites) {
-      filtered = filtered.filter(p => this.favorites.has(p.productname));
-    } else {
-      // Only apply category filter when not showing favorites
-      if (this.currentCategory !== 'All') {
-        filtered = filtered.filter(p => p.category === this.currentCategory);
-      }
-    }
-    
-    // Apply search filter
+    // Apply search filter first
     if (searchTerm) {
       filtered = filtered.filter(p => 
         p.productname.toLowerCase().includes(searchTerm) ||
-        p.category.toLowerCase().includes(searchTerm)
+        p.category.toLowerCase().includes(searchTerm) ||
+        (p.badge && p.badge.toLowerCase().includes(searchTerm))
       );
+    }
+    
+    // Apply favorites filter (shows all favorites regardless of category)
+    if (this.showingFavorites) {
+      filtered = filtered.filter(p => this.favorites.has(p.productname));
+    } else {
+      // Apply category filter only when not showing favorites
+      if (this.currentCategory !== 'All') {
+        filtered = filtered.filter(p => p.category === this.currentCategory);
+      }
     }
     
     this.filteredProducts = filtered;
@@ -629,25 +582,38 @@ class ProductGrid {
     const tabContainer = document.getElementById('categoryTabs');
     tabContainer.innerHTML = '';
     
-    const allBtn = this.createTabButton('All', true);
-    tabContainer.appendChild(allBtn);
+    // Create dropdown container
+    const dropdownContainer = document.createElement('div');
+    dropdownContainer.className = 'category-dropdown';
     
-    Array.from(this.categories).sort().forEach(category => {
-      const btn = this.createTabButton(category, false);
-      tabContainer.appendChild(btn);
-    });
-  }
-  
-  renderCategoryDropdown() {
-    const dropdown = document.getElementById('categoryDropdown');
-    dropdown.innerHTML = '<option value="All">All Categories</option>';
+    // Create dropdown select
+    const select = document.createElement('select');
+    select.id = 'categoryDropdown';
+    select.setAttribute('aria-label', 'Select category');
     
+    // Add "All" option
+    const allOption = document.createElement('option');
+    allOption.value = 'All';
+    allOption.textContent = 'All Categories';
+    allOption.selected = true;
+    select.appendChild(allOption);
+    
+    // Add category options
     Array.from(this.categories).sort().forEach(category => {
       const option = document.createElement('option');
       option.value = category;
       option.textContent = category;
-      dropdown.appendChild(option);
+      select.appendChild(option);
     });
+    
+    // Add event listener
+    select.addEventListener('change', (e) => {
+      this.currentCategory = e.target.value;
+      this.applyFilters(document.getElementById('searchInput').value);
+    });
+    
+    dropdownContainer.appendChild(select);
+    tabContainer.appendChild(dropdownContainer);
   }
   
   createTabButton(category, isActive) {
@@ -661,39 +627,18 @@ class ProductGrid {
     }
     
     btn.addEventListener('click', () => {
-      // Don't allow category switching when showing favorites
-      if (this.showingFavorites) {
-        return;
-      }
+      document.querySelectorAll('.tabs button').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      btn.classList.add('active');
+      btn.setAttribute('aria-selected', 'true');
       
-      this.updateActiveTab(category);
-      this.updateDropdownSelection(category);
       this.currentCategory = category;
       this.applyFilters(document.getElementById('searchInput').value);
     });
     
     return btn;
-  }
-  
-  updateActiveTab(activeCategory) {
-    document.querySelectorAll('.tabs button').forEach(b => {
-      b.classList.remove('active');
-      b.setAttribute('aria-selected', 'false');
-    });
-    
-    // Find and activate the correct tab
-    const tabs = document.querySelectorAll('.tabs button');
-    tabs.forEach(tab => {
-      if (tab.textContent === activeCategory) {
-        tab.classList.add('active');
-        tab.setAttribute('aria-selected', 'true');
-      }
-    });
-  }
-  
-  updateDropdownSelection(category) {
-    const dropdown = document.getElementById('categoryDropdown');
-    dropdown.value = category;
   }
   
   renderProducts() {
