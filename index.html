@@ -207,7 +207,7 @@
       position: absolute;
       top: 16px;
       left: 16px;
-      background: #ffa798;
+      background: #a855f7;
       color: white;
       padding: 4px 8px;
       border-radius: 12px;
@@ -215,6 +215,7 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
+      z-index: 10;
     }
     
     .stars {
@@ -328,7 +329,7 @@
       }
       
       .product-card img {
-        height: 72px;
+        height: 86px; /* Increased by 20% from 72px */
         margin-top: 8px;
         margin-bottom: 5px;
       }
@@ -355,7 +356,7 @@
       }
       
       .stars {
-        margin: 2px 0;
+        margin: 2px 0 4px 0; /* Reduced bottom margin from 2px to 4px */
         font-size: 0.5rem;
       }
       
@@ -365,12 +366,12 @@
       
       .product-card p.price {
         font-size: 0.9rem;
-        margin: 2px 0;
+        margin: 2px 0 4px 0; /* Reduced bottom margin from 2px to 4px */
         font-weight: 700;
       }
       
       .product-card a {
-        margin-top: 5px;
+        margin-top: 4px; /* Reduced from 5px to 4px */
         margin-bottom: 8px;
         padding: 6px 12px;
         font-size: 0.8rem;
@@ -388,6 +389,7 @@
         position: sticky;
         top: 0;
         z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       }
       
       .header .category-dropdown {
@@ -479,7 +481,8 @@ class ProductGrid {
         ratings: 4.5,
         imageurl: "https://via.placeholder.com/200x200/ffa798/white?text=Product+1",
         amazonlink: "#",
-        featured: "yes"
+        featured: "yes",
+        badge: "Top Rated"
       },
       {
         productname: "Sample Product 2",
@@ -488,7 +491,8 @@ class ProductGrid {
         ratings: 4.0,
         imageurl: "https://via.placeholder.com/200x200/8e599c/white?text=Product+2",
         amazonlink: "#",
-        featured: "no"
+        featured: "no",
+        badge: ""
       },
       {
         productname: "Sample Product 3",
@@ -497,7 +501,8 @@ class ProductGrid {
         ratings: 5.0,
         imageurl: "https://via.placeholder.com/200x200/ffa798/white?text=Product+3",
         amazonlink: "#",
-        featured: "yes"
+        featured: "yes",
+        badge: "Best Seller"
       }
     ];
     
@@ -533,7 +538,8 @@ class ProductGrid {
       this.products = data.data.filter(product => product.productname && product.productname.trim()).map(product => ({
         ...product,
         approxprice: parseFloat(product.approxprice) || 0,
-        ratings: parseFloat(product.ratings) || 0
+        ratings: parseFloat(product.ratings) || 0,
+        badge: product.badge || ''
       }));
       
       console.log('Processed products:', this.products.length);
@@ -653,10 +659,11 @@ class ProductGrid {
   applySort(sortValue) {
     switch (sortValue) {
       case 'featured':
+        // Show all products with badges first (regardless of featured status)
         this.filteredProducts.sort((a, b) => {
-          const aFeatured = a.featured === 'yes' ? 1 : 0;
-          const bFeatured = b.featured === 'yes' ? 1 : 0;
-          return bFeatured - aFeatured;
+          const aBadge = a.badge && a.badge.trim() !== '' ? 1 : 0;
+          const bBadge = b.badge && b.badge.trim() !== '' ? 1 : 0;
+          return bBadge - aBadge;
         });
         break;
       case 'low':
@@ -759,10 +766,10 @@ class ProductGrid {
     
     const starsHtml = this.generateStarsHtml(product.ratings);
     const isFavorite = this.favorites.has(product.productname);
-    const isFeatured = product.featured === 'yes';
+    const hasBadge = product.badge && product.badge.trim() !== '';
     
     card.innerHTML = `
-      ${isFeatured ? '<span class="badge">Featured</span>' : ''}
+      ${hasBadge ? `<span class="badge">${product.badge}</span>` : ''}
       <span class="favorite ${isFavorite ? 'active' : ''}" role="button" aria-label="Toggle favorite">
         <i class="fa-${isFavorite ? 'solid' : 'regular'} fa-heart"></i>
       </span>
