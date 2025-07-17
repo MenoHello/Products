@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <div id="productsContainer">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MenoHello Product Grid</title>
@@ -28,9 +27,6 @@
       flex-wrap: wrap;
       gap: 15px;
       align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
       max-width: 1440px;
       margin: 0 auto;
     }
@@ -42,7 +38,7 @@
     
     .header .category-dropdown select {
       background: white;
-      border: 1px solid #ffa798;
+      border: 1px solid #ffd2cb;
       border-radius: 6px;
       padding: 8px 16px;
       font-family: 'Poppins', sans-serif;
@@ -63,7 +59,7 @@
     
     .header .category-dropdown select:focus {
       outline: none;
-      border-color: #ffa798;
+      border-color: #ffd2cb;
     }
     
     .header .category-dropdown select:disabled {
@@ -81,7 +77,7 @@
     
     .header .tabs button {
       background: white;
-      border: 1px solid #ffa798;
+      border: 1px solid #ffd2cb;
       border-radius: 6px;
       padding: 8px 16px;
       font-family: 'Poppins', sans-serif;
@@ -115,7 +111,7 @@
     input[type="text"], select, #favoritesToggle {
       padding: 8px 12px;
       border-radius: 6px;
-      border: 1px solid #ddd;
+      border: 1px solid #ffd2cb;
       font-size: 1rem;
       font-family: 'Poppins', sans-serif;
       transition: border-color 0.3s ease;
@@ -123,7 +119,7 @@
     
     input[type="text"]:focus, select:focus {
       outline: none;
-      border-color: #ffa798;
+      border-color: #ffd2cb;
     }
     
     #favoritesToggle {
@@ -142,7 +138,10 @@
       color: white;
     }
     
-
+    #productsContainer {
+      width: 100%;
+      overflow-x: hidden;
+    }
     
     #product-grid {
       display: grid;
@@ -202,6 +201,20 @@
     
     .favorite.active {
       color: #cd2609;
+    }
+    
+    .badge {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      background: #ffa798;
+      color: white;
+      padding: 4px 8px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
     
     .stars {
@@ -269,18 +282,35 @@
     
     /* Mobile-specific styles */
     @media (max-width: 768px) {
+      body {
+        overflow-x: hidden;
+      }
+      
+      .header {
+        overflow-x: hidden;
+      }
+      
       .header .tabs button {
         display: none;
       }
       
       .header .category-dropdown {
         display: inline-block;
+        min-width: 0;
+        max-width: 100%;
+      }
+      
+      .header .category-dropdown select {
+        min-width: 120px;
+        max-width: 100%;
       }
       
       #product-grid {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         padding: 15px;
         gap: 15px;
+        max-width: 100%;
+        overflow-x: hidden;
       }
       
       .product-card {
@@ -292,8 +322,13 @@
         justify-content: space-between;
       }
       
+      .product-card:hover {
+        transform: none;
+        background-color: #ffd2cb;
+      }
+      
       .product-card img {
-        height: 60px;
+        height: 72px;
         margin-top: 8px;
         margin-bottom: 5px;
       }
@@ -308,12 +343,19 @@
         right: 8px;
       }
       
+      .badge {
+        top: 8px;
+        left: 8px;
+        font-size: 0.6rem;
+        padding: 2px 6px;
+      }
+      
       .product-card h3 {
         display: none;
       }
       
       .stars {
-        margin: 3px 0;
+        margin: 2px 0;
         font-size: 0.5rem;
       }
       
@@ -323,7 +365,7 @@
       
       .product-card p.price {
         font-size: 0.9rem;
-        margin: 3px 0;
+        margin: 2px 0;
         font-weight: 700;
       }
       
@@ -342,6 +384,12 @@
     
     /* Desktop-specific styles */
     @media (min-width: 769px) {
+      .header {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+      
       .header .category-dropdown {
         display: none;
       }
@@ -349,26 +397,42 @@
       .header .tabs button {
         display: inline-block;
       }
+      
+      .product-card:hover {
+        background-color: #ffd2cb;
+        transform: none;
+      }
+      
+      .product-card:hover img {
+        transform: none;
+      }
+      
+      .product-card a:hover {
+        transform: none;
+      }
     }
   </style>
 </head>
 <body>
-<div class="header">
-  <input type="text" id="searchInput" placeholder="Search products..." aria-label="Search products">
-  <select id="sortPrice" aria-label="Sort by price">
-    <option value="default">Default</option>
-    <option value="low">Price: Low to High</option>
-    <option value="high">Price: High to Low</option>
-  </select>
-  <button id="favoritesToggle" aria-label="Toggle favorites view">Show My Favorites</button>
-  <div class="category-dropdown">
-    <select id="categoryDropdown" aria-label="Select category">
-      <option value="default">Categories</option>
+<div id="productsContainer">
+  <div class="header">
+    <input type="text" id="searchInput" placeholder="Search products..." aria-label="Search products">
+    <select id="sortPrice" aria-label="Sort by price">
+      <option value="default">Sort</option>
+      <option value="featured">Featured</option>
+      <option value="low">Price: Low to High</option>
+      <option value="high">Price: High to Low</option>
     </select>
+    <button id="favoritesToggle" aria-label="Toggle favorites view">Show My Favorites</button>
+    <div class="category-dropdown">
+      <select id="categoryDropdown" aria-label="Select category">
+        <option value="default">Categories</option>
+      </select>
+    </div>
+    <div class="tabs" id="categoryTabs" role="tablist"></div>
   </div>
-  <div class="tabs" id="categoryTabs" role="tablist"></div>
+  <div id="product-grid" role="main"></div>
 </div>
-<div id="product-grid" role="main"></div>
 
 <script>
 class ProductGrid {
@@ -414,7 +478,8 @@ class ProductGrid {
         approxprice: 29.99,
         ratings: 4.5,
         imageurl: "https://via.placeholder.com/200x200/ffa798/white?text=Product+1",
-        amazonlink: "#"
+        amazonlink: "#",
+        featured: "yes"
       },
       {
         productname: "Sample Product 2",
@@ -422,19 +487,22 @@ class ProductGrid {
         approxprice: 19.99,
         ratings: 4.0,
         imageurl: "https://via.placeholder.com/200x200/8e599c/white?text=Product+2",
-        amazonlink: "#"
+        amazonlink: "#",
+        featured: "no"
       },
       {
         productname: "Sample Product 3",
-        category: "Health",
+        category: "Supplements",
         approxprice: 39.99,
         ratings: 5.0,
         imageurl: "https://via.placeholder.com/200x200/ffa798/white?text=Product+3",
-        amazonlink: "#"
+        amazonlink: "#",
+        featured: "yes"
       }
     ];
     
     this.products.forEach(p => this.categories.add(p.category));
+    this.categories.add('Supplements'); // Ensure Supplements is always available
     this.filteredProducts = [...this.products];
   }
   
@@ -479,6 +547,9 @@ class ProductGrid {
           this.categories.add(p.category);
         }
       });
+      
+      // Always ensure Supplements category is available
+      this.categories.add('Supplements');
       
       this.filteredProducts = [...this.products];
       console.log('Categories found:', Array.from(this.categories));
@@ -581,6 +652,13 @@ class ProductGrid {
   
   applySort(sortValue) {
     switch (sortValue) {
+      case 'featured':
+        this.filteredProducts.sort((a, b) => {
+          const aFeatured = a.featured === 'yes' ? 1 : 0;
+          const bFeatured = b.featured === 'yes' ? 1 : 0;
+          return bFeatured - aFeatured;
+        });
+        break;
       case 'low':
         this.filteredProducts.sort((a, b) => a.approxprice - b.approxprice);
         break;
@@ -681,8 +759,10 @@ class ProductGrid {
     
     const starsHtml = this.generateStarsHtml(product.ratings);
     const isFavorite = this.favorites.has(product.productname);
+    const isFeatured = product.featured === 'yes';
     
     card.innerHTML = `
+      ${isFeatured ? '<span class="badge">Featured</span>' : ''}
       <span class="favorite ${isFavorite ? 'active' : ''}" role="button" aria-label="Toggle favorite">
         <i class="fa-${isFavorite ? 'solid' : 'regular'} fa-heart"></i>
       </span>
@@ -757,46 +837,46 @@ document.addEventListener('DOMContentLoaded', () => {
   new ProductGrid();
 });
 </script>
-</div>
-  <script>
-    // 1. Function to send iframe height to parent
-    function sendIframeHeight() {
-        // You'll need a main container div for your products content
-        const contentContainer = document.getElementById('productsContainer'); 
-        if (contentContainer) {
-            // Calculate scroll height and add a small buffer
-            const height = contentContainer.scrollHeight + 20;
-            
-            // Log the height for debugging
-            console.log('GitHub Page: Sending iframe height:', height);
-            
-            // IMPORTANT: The targetOrigin MUST be your Pixpa domain
-            window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com');
-        }
-    }
-    
-    // 2. Set up the observer and initial call
-    
-    // Call on initial page load
-    window.addEventListener('DOMContentLoaded', () => {
-      sendIframeHeight();
-    });
 
-    // Use a ResizeObserver to automatically send a new height whenever the content size changes
-    const containerToObserve = document.getElementById('productsContainer');
-    if (containerToObserve) {
-        const resizeObserver = new ResizeObserver(entries => {
-            console.log('GitHub Page: ResizeObserver detected change, requesting new height.');
-            sendIframeHeight();
-        });
-        resizeObserver.observe(containerToObserve);
+<script>
+// 1. Function to send iframe height to parent
+function sendIframeHeight() {
+    // You'll need a main container div for your products content
+    const contentContainer = document.getElementById('productsContainer'); 
+    if (contentContainer) {
+        // Calculate scroll height and add a small buffer
+        const height = contentContainer.scrollHeight + 20;
+        
+        // Log the height for debugging
+        console.log('GitHub Page: Sending iframe height:', height);
+        
+        // IMPORTANT: The targetOrigin MUST be your Pixpa domain
+        window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com');
     }
-    
-    // Fallback for slower-loading content like images
-    window.addEventListener('load', () => {
-      console.log('GitHub Page: window loaded, sending initial height.');
-      sendIframeHeight();
+}
+
+// 2. Set up the observer and initial call
+
+// Call on initial page load
+window.addEventListener('DOMContentLoaded', () => {
+  sendIframeHeight();
+});
+
+// Use a ResizeObserver to automatically send a new height whenever the content size changes
+const containerToObserve = document.getElementById('productsContainer');
+if (containerToObserve) {
+    const resizeObserver = new ResizeObserver(entries => {
+        console.log('GitHub Page: ResizeObserver detected change, requesting new height.');
+        sendIframeHeight();
     });
+    resizeObserver.observe(containerToObserve);
+}
+
+// Fallback for slower-loading content like images
+window.addEventListener('load', () => {
+  console.log('GitHub Page: window loaded, sending initial height.');
+  sendIframeHeight();
+});
 </script>
 </body>
 </html>
