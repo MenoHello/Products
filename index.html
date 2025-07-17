@@ -32,7 +32,6 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     }
     
     .header .category-dropdown {
@@ -442,7 +441,7 @@ class ProductGrid {
     this.products = [];
     this.filteredProducts = [];
     this.categories = new Set();
-    this.currentCategory = 'All';
+    this.currentCategory = 'default';
     this.showingFavorites = false;
     this.favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
     
@@ -536,7 +535,8 @@ class ProductGrid {
         ...product,
         approxprice: parseFloat(product.approxprice) || 0,
         ratings: parseFloat(product.ratings) || 0,
-        badge: product.badge || ''
+        badge: product.badge || '',
+        featured: product.featured || 'no'
       }));
       
       console.log('Processed products:', this.products.length);
@@ -647,19 +647,25 @@ class ProductGrid {
   applySort(sortValue) {
     switch (sortValue) {
       case 'featured':
-        // Sort by actual featured property first, then by badge
         this.filteredProducts.sort((a, b) => {
-          const aFeatured = a.featured === 'yes' ? 1 : 0;
-          const bFeatured = b.featured === 'yes' ? 1 : 0;
+          // First, sort by featured status (yes comes before no)
+          const aFeatured = a.featured && a.featured.toLowerCase() === 'yes';
+          const bFeatured = b.featured && b.featured.toLowerCase() === 'yes';
           
           if (aFeatured !== bFeatured) {
-            return bFeatured - aFeatured; // Featured items first
+            return bFeatured ? 1 : -1;
           }
           
-          // If both have same featured status, sort by badge
-          const aBadge = a.badge && a.badge.trim() !== '' ? 1 : 0;
-          const bBadge = b.badge && b.badge.trim() !== '' ? 1 : 0;
-          return bBadge - aBadge;
+          // If both have same featured status, sort by badge presence
+          const aBadge = a.badge && a.badge.trim() !== '';
+          const bBadge = b.badge && b.badge.trim() !== '';
+          
+          if (aBadge !== bBadge) {
+            return bBadge ? 1 : -1;
+          }
+          
+          // Finally, sort alphabetically
+          return a.productname.localeCompare(b.productname);
         });
         break;
       case 'low':
