@@ -34,6 +34,83 @@
       margin: 0 auto;
     }
     
+    .header .category-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .header .category-dropdown select {
+      background: white;
+      border: 1px solid #ffa798;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      appearance: none;
+      padding-right: 40px;
+      background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 12px;
+    }
+    
+    .header .category-dropdown select:hover {
+      background-color: #ffd2cb;
+    }
+    
+    .header .category-dropdown select:focus {
+      outline: none;
+      border-color: #ffa798;
+    }
+    
+    .header .category-dropdown select:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: #f5f5f5;
+    }
+    
+    .header .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: flex-start;
+    }
+    
+    .header .tabs button {
+      background: white;
+      border: 1px solid #ffa798;
+      border-radius: 6px;
+      padding: 8px 16px;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .header .tabs button:hover {
+      background-color: #ffd2cb;
+      transform: translateY(-1px);
+    }
+    
+    .header .tabs button.active {
+      background-color: #ffa798;
+      color: white;
+    }
+    
+    .header .tabs button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background-color: #f5f5f5;
+      transform: none;
+    }
+    
+    .header .tabs button:disabled:hover {
+      background-color: #f5f5f5;
+      transform: none;
+    }
+    
     input[type="text"], select, #favoritesToggle {
       padding: 8px 12px;
       border-radius: 6px;
@@ -64,89 +141,7 @@
       color: white;
     }
     
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      justify-content: flex-start;
-      background: #ffe9e5;
-      padding: 10px 15px;
-      position: sticky;
-      top: 70px;
-      z-index: 999;
-      max-width: 1440px;
-      margin: 0 auto;
-    }
-    
-    .category-dropdown {
-      position: relative;
-      display: inline-block;
-    }
-    
-    .category-dropdown select {
-      background: white;
-      border: 1px solid #ffa798;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      appearance: none;
-      padding-right: 40px;
-      background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      background-size: 12px;
-    }
-    
-    .category-dropdown select:hover {
-      background-color: #ffd2cb;
-    }
-    
-    .category-dropdown select:focus {
-      outline: none;
-      border-color: #ffa798;
-    }
-    
-    .category-dropdown select:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      background-color: #f5f5f5;
-    }
-    
-    .tabs button {
-      background: white;
-      border: 1px solid #ffa798;
-      border-radius: 6px;
-      padding: 8px 16px;
-      font-family: 'Poppins', sans-serif;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .tabs button:hover {
-      background-color: #ffd2cb;
-      transform: translateY(-1px);
-    }
-    
-    .tabs button.active {
-      background-color: #ffa798;
-      color: white;
-    }
-    
-    .tabs button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      background-color: #f5f5f5;
-      transform: none;
-    }
-    
-    .tabs button:disabled:hover {
-      background-color: #f5f5f5;
-      transform: none;
-    }
+
     
     #product-grid {
       display: grid;
@@ -273,11 +268,11 @@
     
     /* Mobile-specific styles */
     @media (max-width: 768px) {
-      .tabs button {
+      .header .tabs button {
         display: none;
       }
       
-      .category-dropdown {
+      .header .category-dropdown {
         display: inline-block;
       }
       
@@ -346,11 +341,11 @@
     
     /* Desktop-specific styles */
     @media (min-width: 769px) {
-      .category-dropdown {
+      .header .category-dropdown {
         display: none;
       }
       
-      .tabs button {
+      .header .tabs button {
         display: inline-block;
       }
     }
@@ -365,8 +360,13 @@
     <option value="high">Price: High to Low</option>
   </select>
   <button id="favoritesToggle" aria-label="Toggle favorites view">Show My Favorites</button>
+  <div class="category-dropdown">
+    <select id="categoryDropdown" aria-label="Select category">
+      <option value="default">Categories</option>
+    </select>
+  </div>
+  <div class="tabs" id="categoryTabs" role="tablist"></div>
 </div>
-<div class="tabs" id="categoryTabs" role="tablist"></div>
 <div id="product-grid" role="main"></div>
 
 <script>
@@ -523,17 +523,17 @@ class ProductGrid {
     this.showingFavorites = !this.showingFavorites;
     const toggle = document.getElementById('favoritesToggle');
     const categoryDropdown = document.getElementById('categoryDropdown');
-    const categoryButtons = document.querySelectorAll('.tabs button');
+    const categoryButtons = document.querySelectorAll('#categoryTabs button');
     
     if (this.showingFavorites) {
-      toggle.textContent = 'Back to All Products';
+      toggle.textContent = 'Back to Products';
       toggle.classList.add('active');
       // Clear the search when switching to favorites
       document.getElementById('searchInput').value = '';
-      // Switch to "All" category when showing favorites
-      this.currentCategory = 'All';
+      // Switch to default category when showing favorites
+      this.currentCategory = 'default';
       if (categoryDropdown) {
-        categoryDropdown.value = 'All';
+        categoryDropdown.value = 'default';
         categoryDropdown.disabled = true;
       }
       // Disable category buttons
@@ -569,7 +569,7 @@ class ProductGrid {
       filtered = filtered.filter(p => this.favorites.has(p.productname));
     } else {
       // Apply category filter only when not showing favorites
-      if (this.currentCategory !== 'All') {
+      if (this.currentCategory !== 'default') {
         filtered = filtered.filter(p => p.category === this.currentCategory);
       }
     }
@@ -596,45 +596,34 @@ class ProductGrid {
   
   renderTabs() {
     const tabContainer = document.getElementById('categoryTabs');
+    const categoryDropdown = document.getElementById('categoryDropdown');
+    
     tabContainer.innerHTML = '';
+    // Clear existing dropdown options except the first one
+    categoryDropdown.innerHTML = '<option value="default">Categories</option>';
     
-    // Create dropdown container for mobile
-    const dropdownContainer = document.createElement('div');
-    dropdownContainer.className = 'category-dropdown';
-    
-    // Create dropdown select
-    const select = document.createElement('select');
-    select.id = 'categoryDropdown';
-    select.setAttribute('aria-label', 'Select category');
-    
-    // Add "All" option
-    const allOption = document.createElement('option');
-    allOption.value = 'All';
-    allOption.textContent = 'Categories';
-    allOption.selected = true;
-    select.appendChild(allOption);
-    
-    // Add category options
+    // Add category options to dropdown
     Array.from(this.categories).sort().forEach(category => {
       const option = document.createElement('option');
       option.value = category;
       option.textContent = category;
-      select.appendChild(option);
+      categoryDropdown.appendChild(option);
     });
     
     // Add event listener for dropdown
-    select.addEventListener('change', (e) => {
+    categoryDropdown.addEventListener('change', (e) => {
       this.currentCategory = e.target.value;
       this.applyFilters(document.getElementById('searchInput').value);
+      // Update desktop buttons to match
+      document.querySelectorAll('#categoryTabs button').forEach(btn => {
+        btn.classList.remove('active');
+        if (btn.textContent === e.target.value) {
+          btn.classList.add('active');
+        }
+      });
     });
     
-    dropdownContainer.appendChild(select);
-    tabContainer.appendChild(dropdownContainer);
-    
     // Create desktop category buttons
-    const allBtn = this.createTabButton('All', this.currentCategory === 'All');
-    tabContainer.appendChild(allBtn);
-    
     Array.from(this.categories).sort().forEach(category => {
       const btn = this.createTabButton(category, this.currentCategory === category);
       tabContainer.appendChild(btn);
@@ -652,7 +641,7 @@ class ProductGrid {
     }
     
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.tabs button').forEach(b => {
+      document.querySelectorAll('#categoryTabs button').forEach(b => {
         b.classList.remove('active');
         b.setAttribute('aria-selected', 'false');
       });
@@ -660,6 +649,9 @@ class ProductGrid {
       btn.setAttribute('aria-selected', 'true');
       
       this.currentCategory = category;
+      // Update dropdown to match
+      const dropdown = document.getElementById('categoryDropdown');
+      dropdown.value = category;
       this.applyFilters(document.getElementById('searchInput').value);
     });
     
