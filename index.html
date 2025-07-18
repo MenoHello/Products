@@ -111,7 +111,7 @@
       transform: none;
     }
     
-    input[type="text"], select, #favoritesToggle {
+    input[type="text"], select, #favoritesToggle, #clearSearch {
       padding: 8px 12px;
       border-radius: 6px;
       border: 1px solid #ffd2cb;
@@ -125,14 +125,14 @@
       border-color: #ffd2cb;
     }
     
-    #favoritesToggle {
+    #favoritesToggle, #clearSearch {
       cursor: pointer;
       font-weight: 600;
       background: white;
       transition: background-color 0.3s ease;
     }
     
-    #favoritesToggle:hover {
+    #favoritesToggle:hover, #clearSearch:hover {
       background-color: #ffd2cb;
     }
     
@@ -402,6 +402,7 @@
 
   <div class="header">
     <input type="text" id="searchInput" placeholder="Search products..." aria-label="Search products">
+    <button id="clearSearch" style="display: none;" aria-label="Clear search">Clear Search</button>
     <select id="sortPrice" aria-label="Sort by price">
       <option value="default">Sort</option>
       <option value="featured">Featured</option>
@@ -430,6 +431,7 @@ class ProductGrid {
     this.categories = new Set();
     this.currentCategory = 'default';
     this.showingFavorites = false;
+    this.isSearching = false;
     this.favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
     
     this.init();
@@ -502,10 +504,12 @@ class ProductGrid {
   
   setupEventListeners() {
     const searchInput = document.getElementById('searchInput');
+    const clearSearch = document.getElementById('clearSearch');
     const sortSelect = document.getElementById('sortPrice');
     const favoritesToggle = document.getElementById('favoritesToggle');
     
     searchInput.addEventListener('input', this.debounce(() => this.handleSearch(), 300));
+    clearSearch.addEventListener('click', () => this.clearSearch());
     sortSelect.addEventListener('change', () => this.handleSort());
     favoritesToggle.addEventListener('click', () => this.toggleFavorites());
   }
@@ -524,7 +528,40 @@ class ProductGrid {
   
   handleSearch() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    this.applyFilters(searchTerm);
+    const clearSearchBtn = document.getElementById('clearSearch');
+    
+    if (searchTerm.trim() === '') {
+      this.isSearching = false;
+      clearSearchBtn.style.display = 'none';
+      this.applyFilters();
+    } else {
+      this.isSearching = true;
+      clearSearchBtn.style.display = 'inline-block';
+      this.clearActiveTab();
+      this.applyFilters(searchTerm);
+    }
+  }
+  
+  clearSearch() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('clearSearch').style.display = 'none';
+    this.isSearching = false;
+    this.applyFilters();
+  }
+  
+  clearActiveTab() {
+    // Clear all active tabs
+    document.querySelectorAll('#categoryTabs button').forEach(btn => {
+      btn.classList.remove('active');
+      btn.setAttribute('aria-selected', 'false');
+    });
+    
+    // Reset dropdown to default
+    const dropdown = document.getElementById('categoryDropdown');
+    dropdown.value = 'default';
+    
+    // Reset current category
+    this.currentCategory = 'default';
   }
   
   handleSort() {
@@ -565,18 +602,20 @@ class ProductGrid {
     let filtered = [...this.products];
     
     if (searchTerm) {
+      // When searching, ignore category filters and search all products
       filtered = filtered.filter(p => 
         p.productname.toLowerCase().includes(searchTerm) ||
         p.category.toLowerCase().includes(searchTerm)
       );
+    } else {
+      // Only apply category filter when not searching
+      if (this.currentCategory !== 'default' && !this.isSearching) {
+        filtered = filtered.filter(p => p.category === this.currentCategory);
+      }
     }
     
     if (this.showingFavorites) {
       filtered = filtered.filter(p => this.favorites.has(p.productname));
-    } else {
-      if (this.currentCategory !== 'default') {
-        filtered = filtered.filter(p => p.category === this.currentCategory);
-      }
     }
     
     this.filteredProducts = filtered;
@@ -780,3 +819,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </body>
 </html>
+
