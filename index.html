@@ -412,7 +412,7 @@
   </style>
 </head>
 <body>
-<div id="productsContainer">
+
   <div class="header">
     <input type="text" id="searchInput" placeholder="Search products..." aria-label="Search products">
     <select id="sortPrice" aria-label="Sort by price">
@@ -838,33 +838,6 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 
-<script>
-function sendIframeHeight() {
-    const contentContainer = document.getElementById('productsContainer'); 
-    if (contentContainer) {
-        const height = contentContainer.scrollHeight + 20;
-        console.log('GitHub Page: Sending iframe height:', height);
-        window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com');
-    }
-}
 
-window.addEventListener('DOMContentLoaded', () => {
-  sendIframeHeight();
-});
-
-const containerToObserve = document.getElementById('productsContainer');
-if (containerToObserve) {
-    const resizeObserver = new ResizeObserver(entries => {
-        console.log('GitHub Page: ResizeObserver detected change, requesting new height.');
-        sendIframeHeight();
-    });
-    resizeObserver.observe(containerToObserve);
-}
-
-window.addEventListener('load', () => {
-  console.log('GitHub Page: window loaded, sending initial height.');
-  sendIframeHeight();
-});
-</script>
 </body>
 </html>
