@@ -395,19 +395,6 @@
       .header .tabs button {
         display: inline-block;
       }
-      
-      .product-card:hover {
-        background-color: #ffd2cb;
-        transform: none;
-      }
-      
-      .product-card:hover img {
-        transform: none;
-      }
-      
-      .product-card a:hover {
-        transform: none;
-      }
     }
   </style>
 </head>
@@ -458,53 +445,7 @@ class ProductGrid {
     } catch (error) {
       console.error('Error loading products:', error);
       this.showError(`Failed to load products: ${error.message}`);
-      
-      // Fallback to sample data for testing
-      console.log('Loading sample data as fallback...');
-      this.loadSampleData();
-      this.setupEventListeners();
-      this.renderTabs();
-      this.renderProducts();
     }
-  }
-  
-  loadSampleData() {
-    this.products = [
-      {
-        productname: "Sample Product 1",
-        category: "Health",
-        approxprice: 29.99,
-        ratings: 4.5,
-        imageurl: "https://via.placeholder.com/200x200/ffa798/white?text=Product+1",
-        amazonlink: "#",
-        featured: "yes",
-        badge: "Top Rated"
-      },
-      {
-        productname: "Sample Product 2",
-        category: "Beauty",
-        approxprice: 19.99,
-        ratings: 4.0,
-        imageurl: "https://via.placeholder.com/200x200/8e599c/white?text=Product+2",
-        amazonlink: "#",
-        featured: "no",
-        badge: ""
-      },
-      {
-        productname: "Sample Product 3",
-        category: "Supplements",
-        approxprice: 39.99,
-        ratings: 5.0,
-        imageurl: "https://via.placeholder.com/200x200/ffa798/white?text=Product+3",
-        amazonlink: "#",
-        featured: "yes",
-        badge: "Best Seller"
-      }
-    ];
-    
-    this.products.forEach(p => this.categories.add(p.category));
-    this.categories.add('Supplements');
-    this.filteredProducts = [...this.products];
   }
   
   async loadProducts() {
@@ -550,8 +491,6 @@ class ProductGrid {
           this.categories.add(p.category);
         }
       });
-      
-      this.categories.add('Supplements');
       
       this.filteredProducts = [...this.products];
       console.log('Categories found:', Array.from(this.categories));
