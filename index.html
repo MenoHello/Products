@@ -10,7 +10,8 @@
   <style>
     /* Product card element spacing - Use this for global adjustments on desktop */
     :root {
-      --desktop-card-element-spacing: 12px;
+      --desktop-card-element-spacing: 8px; /* Reduced default spacing for a more compact look */
+      --desktop-card-button-margin-top: 15px; /* Slightly more space for the button */
     }
 
     * {
@@ -174,12 +175,12 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
-      /* Use flex-end to push the button to the bottom, ensuring it's always inside */
-      justify-content: flex-end;
-      align-items: center; /* Center items horizontally within the card */
+      /* Changed to flex-start to align content from the top */
+      justify-content: flex-start;
+      align-items: center;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       min-height: 400px;
-      padding-bottom: 12px; /* Add some padding at the bottom of the card */
+      padding-bottom: 12px;
     }
 
     .product-card:hover {
@@ -192,10 +193,10 @@
       height: 190px;
       object-fit: contain;
       border-radius: 6px;
-      margin-top: var(--desktop-card-element-spacing);
+      margin-top: var(--desktop-card-element-spacing); /* Keep image margin consistent */
       margin-bottom: var(--desktop-card-element-spacing);
       transition: transform 0.3s ease;
-      flex-shrink: 0; /* Prevent image from shrinking if content below is too tall */
+      flex-shrink: 0;
     }
 
     .product-card:hover img {
@@ -236,9 +237,10 @@
     }
 
     .stars {
-      margin: var(--desktop-card-element-spacing) 0;
+      margin: 0; /* Removed top/bottom margin */
       font-size: 0.7rem;
       color: gold;
+      padding-bottom: var(--desktop-card-element-spacing); /* Use padding to create space below */
     }
 
     .stars i {
@@ -246,28 +248,30 @@
     }
 
     .product-card h3 {
-      margin: var(--desktop-card-element-spacing) 0 8px;
+      margin: 0; /* Removed top/bottom margin */
       font-weight: 700;
       font-size: 1.1rem;
       line-height: 1.3;
-      flex-grow: 1; /* Allows the title to take up available space, pushing down subsequent elements */
-      display: flex; /* Make h3 a flex container */
-      align-items: center; /* Vertically center content if it's a single line */
-      justify-content: center; /* Horizontally center content */
+      /* flex-grow: 1; Removed flex-grow on h3 to prevent it from pushing elements down too much */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-bottom: var(--desktop-card-element-spacing); /* Use padding to create space below */
     }
 
     .product-card p.price {
       font-weight: 600;
-      margin: 8px 0;
+      margin: 0; /* Removed top/bottom margin */
       font-size: 1.2rem;
       color: #333;
       flex-shrink: 0;
+      padding-bottom: var(--desktop-card-element-spacing); /* Use padding to create space below */
     }
 
     .product-card a {
       display: inline-block;
-      margin-top: 12px; /* Adjusted to a fixed value for consistent spacing from price */
-      margin-bottom: 0; /* Remove bottom margin to keep button inside card's padding */
+      margin-top: var(--desktop-card-button-margin-top); /* Use new variable for button top margin */
+      margin-bottom: 0;
       background-color: #ffa798;
       color: #fff;
       padding: 10px 20px;
@@ -276,8 +280,8 @@
       font-weight: 600;
       transition: all 0.3s ease;
       position: relative;
-      z-index: 2; /* Ensure the button is above other potential overlapping elements */
-      flex-shrink: 0; /* Prevent button from shrinking */
+      z-index: 2;
+      flex-shrink: 0;
     }
 
     .product-card a:hover {
@@ -314,9 +318,9 @@
 
       .header {
         overflow-x: hidden;
-        position: sticky; /* Keep header sticky on mobile */
+        position: sticky;
         top: 0;
-        transform: translateY(0); /* Ensure header is visible on mobile by default */
+        transform: translateY(0);
       }
 
       .header .tabs button {
@@ -348,8 +352,8 @@
         padding: 8px;
         display: flex;
         flex-direction: column;
-        justify-content: space-between; /* Use space-between on mobile to spread out content */
-        padding-bottom: 8px; /* Ensure sufficient padding at the bottom for the button */
+        justify-content: flex-start; /* Changed to flex-start for mobile too */
+        padding-bottom: 8px;
       }
 
       .product-card:hover {
@@ -382,11 +386,12 @@
 
       .product-card h3 {
         display: none;
-        flex-grow: 0; /* Remove flex-grow when hidden */
+        flex-grow: 0;
       }
 
       .stars {
-        margin: 2px 0 4px 0;
+        margin: 0; /* Removed margin */
+        padding-bottom: 4px; /* Reduced padding for mobile */
         font-size: 0.5rem;
       }
 
@@ -396,17 +401,18 @@
 
       .product-card p.price {
         font-size: 0.9rem;
-        margin: 2px 0 4px 0;
+        margin: 0; /* Removed margin */
+        padding-bottom: 4px; /* Reduced padding for mobile */
         font-weight: 700;
       }
 
       .product-card a {
-        margin-top: 4px;
-        margin-bottom: 0; /* Essential to remove to prevent overlap */
+        margin-top: 8px; /* Adjusted button margin for mobile */
+        margin-bottom: 0;
         padding: 6px 12px;
         font-size: 0.8rem;
         border-radius: 4px;
-        z-index: 10; /* Ensure button is on top */
+        z-index: 10;
       }
 
       .product-card a:hover {
@@ -425,7 +431,7 @@
       }
 
       .favorite.active {
-        color: #cd2609; /* Explicitly ensure this applies for desktop */
+        color: #cd2609;
       }
     }
   </style>
@@ -468,7 +474,6 @@ class ProductGrid {
 
     this.header = document.querySelector('.header');
     // Adjust this value based on your first row's height. You might need to test this.
-    // A rough estimate is (card_height + gap_height) or simply measure it in your browser's dev tools.
     this.firstRowThreshold = 500; // Example: assuming ~2 products fit vertically before scrolling
 
     this.init();
