@@ -10,8 +10,8 @@
   <style>
     /* Product card element spacing - Use this for global adjustments on desktop */
     :root {
-      --desktop-card-element-spacing: 8px; /* Reduced default spacing for a more compact look */
-      --desktop-card-button-margin-top: 15px; /* Slightly more space for the button */
+      --desktop-card-element-spacing: 6px; /* Further reduced slightly */
+      --desktop-card-button-margin-top: auto; /* Allow button to be pushed to the bottom */
     }
 
     * {
@@ -175,12 +175,11 @@
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
       display: flex;
       flex-direction: column;
-      /* Changed to flex-start to align content from the top */
-      justify-content: flex-start;
+      justify-content: space-between; /* Distribute space to push button down */
       align-items: center;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
-      min-height: 400px;
-      padding-bottom: 12px;
+      min-height: 400px; /* Ensures cards have a minimum height */
+      padding-bottom: 12px; /* Padding inside the card at the bottom */
     }
 
     .product-card:hover {
@@ -193,7 +192,7 @@
       height: 190px;
       object-fit: contain;
       border-radius: 6px;
-      margin-top: var(--desktop-card-element-spacing); /* Keep image margin consistent */
+      margin-top: var(--desktop-card-element-spacing);
       margin-bottom: var(--desktop-card-element-spacing);
       transition: transform 0.3s ease;
       flex-shrink: 0;
@@ -237,10 +236,10 @@
     }
 
     .stars {
-      margin: 0; /* Removed top/bottom margin */
+      margin-top: var(--desktop-card-element-spacing);
+      margin-bottom: var(--desktop-card-element-spacing);
       font-size: 0.7rem;
       color: gold;
-      padding-bottom: var(--desktop-card-element-spacing); /* Use padding to create space below */
     }
 
     .stars i {
@@ -248,30 +247,27 @@
     }
 
     .product-card h3 {
-      margin: 0; /* Removed top/bottom margin */
+      margin-top: var(--desktop-card-element-spacing);
+      margin-bottom: var(--desktop-card-element-spacing);
       font-weight: 700;
       font-size: 1.1rem;
       line-height: 1.3;
-      /* flex-grow: 1; Removed flex-grow on h3 to prevent it from pushing elements down too much */
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-bottom: var(--desktop-card-element-spacing); /* Use padding to create space below */
+      /* No flex-grow on h3 here, allowing content to take natural space */
     }
 
     .product-card p.price {
       font-weight: 600;
-      margin: 0; /* Removed top/bottom margin */
+      margin-top: var(--desktop-card-element-spacing);
+      margin-bottom: var(--desktop-card-element-spacing);
       font-size: 1.2rem;
       color: #333;
       flex-shrink: 0;
-      padding-bottom: var(--desktop-card-element-spacing); /* Use padding to create space below */
     }
 
     .product-card a {
       display: inline-block;
-      margin-top: var(--desktop-card-button-margin-top); /* Use new variable for button top margin */
-      margin-bottom: 0;
+      margin-top: var(--desktop-card-button-margin-top); /* This will be 'auto' for alignment */
+      margin-bottom: 0; /* Ensures button sticks to the bottom edge of content */
       background-color: #ffa798;
       color: #fff;
       padding: 10px 20px;
@@ -347,12 +343,12 @@
       }
 
       .product-card {
-        min-height: 0;
-        aspect-ratio: 4/5;
+        min-height: 0; /* Allow height to adjust on mobile */
+        aspect-ratio: 4/5; /* Maintain aspect ratio */
         padding: 8px;
         display: flex;
         flex-direction: column;
-        justify-content: flex-start; /* Changed to flex-start for mobile too */
+        justify-content: space-between; /* Distribute space to push button down */
         padding-bottom: 8px;
       }
 
@@ -385,13 +381,13 @@
       }
 
       .product-card h3 {
-        display: none;
+        display: none; /* Keep h3 hidden on mobile */
         flex-grow: 0;
       }
 
       .stars {
-        margin: 0; /* Removed margin */
-        padding-bottom: 4px; /* Reduced padding for mobile */
+        margin-top: 4px;
+        margin-bottom: 4px;
         font-size: 0.5rem;
       }
 
@@ -401,13 +397,13 @@
 
       .product-card p.price {
         font-size: 0.9rem;
-        margin: 0; /* Removed margin */
-        padding-bottom: 4px; /* Reduced padding for mobile */
+        margin-top: 2px;
+        margin-bottom: 6px;
         font-weight: 700;
       }
 
       .product-card a {
-        margin-top: 8px; /* Adjusted button margin for mobile */
+        margin-top: auto; /* Push to the bottom on mobile too */
         margin-bottom: 0;
         padding: 6px 12px;
         font-size: 0.8rem;
