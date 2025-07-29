@@ -353,8 +353,8 @@
             }
 
             .product-card {
-                min-height: 250px;
-               aspect-ratio: unset;
+                min-height: 0; /* Allow height to adjust on mobile */
+               
                 padding: 8px;
                 display: flex;
                 flex-direction: column;
@@ -369,8 +369,8 @@
 
             .product-card img {
                 height: 86px;
-                margin-top: 6px;
-                margin-bottom: 6px;
+                margin-top: 8px;
+                margin-bottom: 5px;
             }
 
             .product-card:hover img {
@@ -396,8 +396,8 @@
             }
 
             .stars {
-                margin-top: 3px;
-                margin-bottom: 3px;
+                margin-top: 4px;
+                margin-bottom: 4px;
                 font-size: 0.5rem;
             }
 
@@ -408,12 +408,12 @@
             .product-card p.price {
                 font-size: 0.9rem;
                 margin-top: 2px;
-                margin-bottom: 3px;
+                margin-bottom: 6px;
                 font-weight: 700;
             }
 
             .product-card a {
-                margin-top: auto; /* Shop Now Button - Push to the bottom on mobile too */
+                margin-top: auto; /* Push to the bottom on mobile too */
                 margin-bottom: 0;
                 padding: 6px 12px;
                 font-size: 0.8rem;
@@ -996,4 +996,5 @@ window.addEventListener('load', () => {
 
 </body>
 </html>
+
 
