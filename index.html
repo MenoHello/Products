@@ -50,6 +50,12 @@
             display: inline-block;
         }
 
+.header,
+.header * {
+  color: black !important;
+  text-decoration: none;
+}
+
         .header .category-dropdown select {
             background: white;
             border: 1px solid #ffd2cb;
@@ -170,23 +176,22 @@
             gap: 30px;
         }
 
-     .product-card {
-    background: white;
-    padding: 12px;
-    border-radius: 8px;
-    text-align: center;
-    position: relative;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    align-items: center;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-    min-height: 400px;
-    padding-bottom: 12px;
-    overflow: hidden; /* Prevent button from spilling out */
-    color: black; /* Default text color */
-}
+        .product-card {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Distribute space to push button down */
+            align-items: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            min-height: 400px; /* Ensures cards have a minimum height */
+            padding-bottom: 12px; /* Padding inside the card at the bottom */
+        }
+
         .product-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -348,18 +353,14 @@
             }
 
             .product-card {
-  background-color: #ffffff;
-  padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  height: 100%;
-  overflow: hidden; /* Prevents content from spilling out */
-  box-sizing: border-box;
-  position: relative;
-}
+                min-height: 0; /* Allow height to adjust on mobile */
+                aspect-ratio: 4/5; /* Maintain aspect ratio */
+                padding: 8px;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between; /* Distribute space to push button down */
+                padding-bottom: 8px;
+            }
 
             .product-card:hover {
                 transform: none;
@@ -419,11 +420,6 @@
                 border-radius: 4px;
                 z-index: 10;
             }
-            
-        
-.product-card {
-    color: black !important;
-}
 
             .product-card a:hover {
                 transform: none;
@@ -1000,3 +996,4 @@ window.addEventListener('load', () => {
 
 </body>
 </html>
+
