@@ -50,11 +50,10 @@
             display: inline-block;
         }
 
-.header,
-.header * {
-  color: black !important;
-  text-decoration: none;
-}
+        .header, .header * {
+            color: black !important;
+            text-decoration: none;
+        }
 
         .header .category-dropdown select {
             background: white;
@@ -163,7 +162,7 @@
             width: 100%;
             overflow-x: hidden;
             /* Added min-height to help with initial render stability */
-            min-height: 200px; 
+            min-height: 200px;
             box-sizing: border-box; /* Include padding/border in element's total width and height */
         }
 
@@ -212,7 +211,8 @@
             transform: scale(1.05);
         }
 
-        .favorite {
+        /* FIXED: More specific selector for favorite icons */
+        .product-card .favorite {
             position: absolute;
             top: 16px;
             right: 16px;
@@ -222,12 +222,13 @@
             transition: all 0.3s ease;
         }
 
-        .favorite:hover {
+        .product-card .favorite:hover {
             transform: scale(1.1);
         }
 
-        .favorite.active {
-            color: #cd2609;
+        /* FIXED: More specific selector with !important to override Font Awesome defaults */
+        .product-card .favorite.active {
+            color: #cd2609 !important;
         }
 
         .badge {
@@ -354,7 +355,6 @@
 
             .product-card {
                 min-height: 0; /* Allow height to adjust on mobile */
-               
                 padding: 8px;
                 display: flex;
                 flex-direction: column;
@@ -377,7 +377,7 @@
                 transform: none;
             }
 
-            .favorite {
+            .product-card .favorite {
                 font-size: 1.2rem;
                 top: 8px;
                 right: 8px;
@@ -435,16 +435,11 @@
             .header .tabs button {
                 display: inline-block;
             }
-
-            .favorite.active {
-                color: #cd2609;
-            }
         }
     </style>
 </head>
 <body>
-
-    <div id="productsContainer"> 
+    <div id="productsContainer">
         <div class="header">
             <input type="text" id="searchInput" placeholder="Search products..." aria-label="Search products">
             <button id="clearSearch" style="display: none;" aria-label="Clear search">Clear Search</button>
@@ -463,538 +458,537 @@
             <div class="tabs" id="categoryTabs" role="tablist"></div>
         </div>
         <div id="product-grid" role="main"></div>
-    </div> <script>
-class ProductGrid {
-    constructor() {
-        this.sheetId = '1a3tUL0Te-nzVrraDE3WetntJpdITpoDO7V4nFV6jr6I';
-        this.gid = '0';
-        this.csvUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/export?format=csv&gid=${this.gid}`;
-        this.products = [];
-        this.filteredProducts = [];
-        this.categories = new Set();
-        this.currentCategory = 'default';
-        this.showingFavorites = false;
-        this.isSearching = false;
-        this.favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
+    </div>
 
-        this.header = document.querySelector('.header');
-        // Adjust this value based on your first row's height. You might need to test this.
-        this.firstRowThreshold = 500; // Example: assuming ~2 products fit vertically before scrolling
+    <script>
+        class ProductGrid {
+            constructor() {
+                this.sheetId = '1a3tUL0Te-nzVrraDE3WetntJpdITpoDO7V4nFV6jr6I';
+                this.gid = '0';
+                this.csvUrl = `https://docs.google.com/spreadsheets/d/${this.sheetId}/export?format=csv&gid=${this.gid}`;
+                this.products = [];
+                this.filteredProducts = [];
+                this.categories = new Set();
+                this.currentCategory = 'default';
+                this.showingFavorites = false;
+                this.isSearching = false;
 
-        // Reference to the main content container for height calculation
-        this.mainContentContainer = document.getElementById('productsContainer');
-        this.resizeObserver = null;
-        this.mutationObserver = null; // Added MutationObserver
-        
-        this.init();
-    }
+                // Updated to use a unique ID instead of productname for favorites
+                this.favorites = new Set(JSON.parse(localStorage.getItem('favorites') || '[]'));
 
-    async init() {
-        try {
-            this.showLoading();
-            await this.loadProducts();
-            this.setupEventListeners();
-            this.renderTabs();
-            this.renderProducts(); // Initial render of products
-            
-            // Allow some time for images to load and layout to settle
-            setTimeout(() => {
-                this.sendIframeHeight(); // Initial height send after content is rendered and a short delay
-                this.setupObservers(); // Setup observers after initial render and height send
-            }, 500); // 500ms delay to allow render and image loading
-            
-        } catch (error) {
-            console.error('Error loading products:', error);
-            this.showError(`Failed to load products: ${error.message}`);
-            this.sendIframeHeight(); // Send height even on error to adjust iframe to error message
-        }
-    }
+                this.header = document.querySelector('.header');
 
-    // Function to send iframe height to parent
-    sendIframeHeight() {
-        if (this.mainContentContainer) {
-            // Calculate scroll height, adding a small buffer for margin/padding
-            // Use scrollHeight which accounts for content that might be outside the viewport
-            const height = this.mainContentContainer.scrollHeight + 40; 
-            
-            // Log the height we are sending for debugging
-            console.log('GitHub Page: Sending iframe height:', height);
+                // Adjust this value based on your first row's height. You might need to test this.
+                this.firstRowThreshold = 500; // Example: assuming ~2 products fit vertically before scrolling
 
-            // IMPORTANT: The targetOrigin MUST be your Pixpa domain
-            window.parent.postMessage({ type: 'setIframeHeight', height: height }, 'https://www.menohello.com');
-        } else {
-            console.error('GitHub Page: productsContainer not found for height calculation.');
-        }
-    }
+                // Reference to the main content container for height calculation
+                this.mainContentContainer = document.getElementById('productsContainer');
+                this.resizeObserver = null;
+                this.mutationObserver = null; // Added MutationObserver
 
-    // Function to set up all relevant observers
-    setupObservers() {
-        if (this.mainContentContainer) {
-            // ResizeObserver for changes in element dimensions
-            if (!this.resizeObserver) {
-                this.resizeObserver = new ResizeObserver(entries => {
-                    console.log('GitHub Page: ResizeObserver detected change, requesting new height.');
-                    // Debounce sending height to avoid excessive messages during rapid resizing
-                    this.debounce(this.sendIframeHeight.bind(this), 100)(); 
-                });
-                this.resizeObserver.observe(this.mainContentContainer);
+                this.init();
             }
 
-            // MutationObserver for changes in DOM structure (e.g., adding/removing product cards)
-            if (!this.mutationObserver) {
-                this.mutationObserver = new MutationObserver(mutations => {
-                    let layoutChanged = false;
-                    for (let mutation of mutations) {
-                        if (mutation.type === 'childList' || 
-                            (mutation.type === 'attributes' && mutation.attributeName === 'style')) {
-                            layoutChanged = true;
-                            break;
-                        }
-                    }
-                    if (layoutChanged) {
-                        console.log('GitHub Page: MutationObserver detected DOM change, requesting new height.');
-                        this.debounce(this.sendIframeHeight.bind(this), 100)();
-                    }
-                });
-                // Observe changes to child elements and their attributes within productsContainer
-                this.mutationObserver.observe(this.mainContentContainer, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
-            }
-        }
-    }
+            async init() {
+                try {
+                    this.showLoading();
+                    await this.loadProducts();
+                    this.setupEventListeners();
+                    this.renderTabs();
+                    this.renderProducts(); // Initial render of products
 
-    async loadProducts() {
-        try {
-            console.log('Fetching data from:', this.csvUrl);
-            const response = await fetch(this.csvUrl);
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-
-            const csvText = await response.text();
-            console.log('CSV data received, length:', csvText.length);
-
-            const data = Papa.parse(csvText, {
-                header: true,
-                skipEmptyLines: true,
-                transformHeader: (header) => header.trim().toLowerCase()
-            });
-
-            console.log('Parsed data:', data);
-
-            if (data.errors && data.errors.length > 0) {
-                console.error('Parse errors:', data.errors);
-            }
-
-            // Use a Map to store unique products by productName to prevent duplicates
-            const uniqueProductsMap = new Map();
-            data.data.filter(product => product.productname && product.productname.trim()).forEach(product => {
-                const processedProduct = {
-                    ...product,
-                    approxprice: parseFloat(product.approxprice) || 0,
-                    ratings: parseFloat(product.ratings) || 0,
-                    badge: product.badge || '',
-                    featured: product.featured || 'no'
-                };
-                // Use productname as the key to ensure uniqueness
-                uniqueProductsMap.set(processedProduct.productname, processedProduct);
-            });
-
-            this.products = Array.from(uniqueProductsMap.values());
-
-            console.log('Processed unique products:', this.products.length);
-
-            if (this.products.length === 0) {
-                throw new Error('No valid products found in the data');
-            }
-
-            this.products.forEach(p => {
-                if (p.category) {
-                    this.categories.add(p.category);
+                    // Allow some time for images to load and layout to settle
+                    setTimeout(() => {
+                        this.sendIframeHeight(); // Initial height send after content is rendered and a short delay
+                        this.setupObservers(); // Setup observers after initial render and height send
+                    }, 500); // 500ms delay to allow render and image loading
+                } catch (error) {
+                    console.error('Error loading products:', error);
+                    this.showError(`Failed to load products: ${error.message}`);
+                    this.sendIframeHeight(); // Send height even on error to adjust iframe to error message
                 }
-            });
-
-            this.filteredProducts = [...this.products];
-            console.log('Categories found:', Array.from(this.categories));
-        } catch (error) {
-            console.error('Error in loadProducts:', error);
-            throw error;
-        }
-    }
-
-    setupEventListeners() {
-        const searchInput = document.getElementById('searchInput');
-        const clearSearch = document.getElementById('clearSearch');
-        const sortSelect = document.getElementById('sortPrice');
-        const favoritesToggle = document.getElementById('favoritesToggle');
-
-        searchInput.addEventListener('input', this.debounce(() => this.handleSearch(), 300));
-        clearSearch.addEventListener('click', () => this.clearSearch());
-        sortSelect.addEventListener('change', () => this.handleSort());
-        favoritesToggle.addEventListener('click', () => this.toggleFavorites());
-
-        // Header visibility on scroll
-        window.addEventListener('scroll', () => this.handleHeaderScroll());
-    }
-
-    debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-
-    handleHeaderScroll() {
-        // Only hide header on desktop
-        if (window.innerWidth >= 769) {
-            const scrollPosition = window.scrollY || document.documentElement.scrollTop;
-            if (scrollPosition > this.firstRowThreshold) {
-                this.header.classList.add('hidden');
-            } else {
-                this.header.classList.remove('hidden');
             }
-        } else {
-            // Ensure header is always visible on mobile
-            this.header.classList.remove('hidden');
-        }
-    }
 
-    handleSearch() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const clearSearchBtn = document.getElementById('clearSearch');
+            // Function to send iframe height to parent
+            sendIframeHeight() {
+                if (this.mainContentContainer) {
+                    // Calculate scroll height, adding a small buffer for margin/padding
+                    // Use scrollHeight which accounts for content that might be outside the viewport
+                    const height = this.mainContentContainer.scrollHeight + 40;
 
-        if (searchTerm.trim() === '') {
-            this.isSearching = false;
-            clearSearchBtn.style.display = 'none';
-            this.applyFilters();
-        } else {
-            this.isSearching = true;
-            clearSearchBtn.style.display = 'inline-block';
-            this.clearActiveTab();
-            this.applyFilters(searchTerm);
-        }
-    }
+                    // Log the height we are sending for debugging
+                    console.log('GitHub Page: Sending iframe height:', height);
 
-    clearSearch() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('clearSearch').style.display = 'none';
-        this.isSearching = false;
-        this.applyFilters();
-    }
-
-    clearActiveTab() {
-        // Clear all active tabs
-        document.querySelectorAll('#categoryTabs button').forEach(btn => {
-            btn.classList.remove('active');
-            btn.setAttribute('aria-selected', 'false');
-        });
-
-        // Reset dropdown to default
-        const dropdown = document.getElementById('categoryDropdown');
-        dropdown.value = 'default';
-
-        // Reset current category
-        this.currentCategory = 'default';
-    }
-
-    handleSort() {
-        const sortValue = document.getElementById('sortPrice').value;
-        this.applySort(sortValue);
-    }
-
-    toggleFavorites() {
-        this.showingFavorites = !this.showingFavorites;
-        const toggle = document.getElementById('favoritesToggle');
-        const categoryDropdown = document.getElementById('categoryDropdown');
-        const categoryButtons = document.querySelectorAll('#categoryTabs button');
-
-        if (this.showingFavorites) {
-            toggle.textContent = 'Back to Products';
-            toggle.classList.add('active');
-            document.getElementById('searchInput').value = '';
-            this.isSearching = false; // Ensure search is off when showing favorites
-            this.currentCategory = 'default';
-            if (categoryDropdown) {
-                categoryDropdown.value = 'default';
-                categoryDropdown.disabled = true;
+                    // IMPORTANT: The targetOrigin MUST be your Pixpa domain
+                    window.parent.postMessage({
+                        type: 'setIframeHeight',
+                        height: height
+                    }, 'https://www.menohello.com');
+                } else {
+                    console.error('GitHub Page: productsContainer not found for height calculation.');
+                }
             }
-            categoryButtons.forEach(btn => btn.disabled = true);
-            this.clearSearch(); // Clear search input and hide button
-            this.clearActiveTab(); // Clear active category tab
-        } else {
-            toggle.textContent = 'Show My Favorites';
-            toggle.classList.remove('active');
-            document.getElementById('searchInput').value = '';
-            if (categoryDropdown) {
-                categoryDropdown.disabled = false;
-            }
-            categoryButtons.forEach(btn => btn.disabled = false);
-        }
 
-        this.applyFilters();
-    }
-
-    applyFilters(searchTerm = '') {
-        let filtered = [...this.products];
-
-        if (searchTerm) {
-            // When searching, ignore category filters and search all products
-            filtered = filtered.filter(p =>
-                p.productname.toLowerCase().includes(searchTerm) ||
-                (p.category && p.category.toLowerCase().includes(searchTerm))
-            );
-            // Remove duplicates from search results based on productname
-            const seenProductNames = new Set();
-            filtered = filtered.filter(product => {
-                const isDuplicate = seenProductNames.has(product.productname);
-                seenProductNames.add(product.productname);
-                return !isDuplicate;
-            });
-        } else {
-            // Only apply category filter when not searching
-            if (this.currentCategory !== 'default' && !this.isSearching) {
-                filtered = filtered.filter(p => p.category === this.currentCategory);
-            }
-        }
-
-        if (this.showingFavorites) {
-            filtered = filtered.filter(p => this.favorites.has(p.productname));
-            // Remove duplicates from favorites if any (e.g., if a product was favorited and duplicated in source)
-            const seenProductNamesFavorites = new Set();
-            filtered = filtered.filter(product => {
-                const isDuplicate = seenProductNamesFavorites.has(product.productname);
-                seenProductNamesFavorites.add(product.productname);
-                return !isDuplicate;
-            });
-        }
-
-        this.filteredProducts = filtered;
-        this.applySort(document.getElementById('sortPrice').value);
-    }
-
-    applySort(sortValue) {
-        switch (sortValue) {
-            case 'featured':
-                this.filteredProducts.sort((a, b) => {
-                    // First, sort by featured status (yes comes before no)
-                    const aFeatured = a.featured && a.featured.toLowerCase() === 'yes';
-                    const bFeatured = b.featured && b.featured.toLowerCase() === 'yes';
-
-                    if (aFeatured !== bFeatured) {
-                        return bFeatured ? -1 : 1; // Corrected order: featured (yes) comes before not featured (no)
+            // Function to set up all relevant observers
+            setupObservers() {
+                if (this.mainContentContainer) {
+                    // ResizeObserver for changes in element dimensions
+                    if (!this.resizeObserver) {
+                        this.resizeObserver = new ResizeObserver(entries => {
+                            console.log('GitHub Page: ResizeObserver detected change, requesting new height.');
+                            // Debounce sending height to avoid excessive messages during rapid resizing
+                            this.debounce(this.sendIframeHeight.bind(this), 100)();
+                        });
+                        this.resizeObserver.observe(this.mainContentContainer);
                     }
 
-                    // If both have same featured status, sort by badge presence
-                    const aBadge = a.badge && a.badge.trim() !== '';
-                    const bBadge = b.badge && b.badge.trim() !== '';
+                    // MutationObserver for changes in DOM structure (e.g., adding/removing product cards)
+                    if (!this.mutationObserver) {
+                        this.mutationObserver = new MutationObserver(mutations => {
+                            let layoutChanged = false;
+                            for (let mutation of mutations) {
+                                if (mutation.type === 'childList' || (mutation.type === 'attributes' && mutation.attributeName === 'style')) {
+                                    layoutChanged = true;
+                                    break;
+                                }
+                            }
+                            if (layoutChanged) {
+                                console.log('GitHub Page: MutationObserver detected DOM change, requesting new height.');
+                                this.debounce(this.sendIframeHeight.bind(this), 100)();
+                            }
+                        });
 
-                    if (aBadge !== bBadge) {
-                        return bBadge ? -1 : 1; // Corrected order: badge comes before no badge
+                        // Observe changes to child elements and their attributes within productsContainer
+                        this.mutationObserver.observe(this.mainContentContainer, {
+                            childList: true,
+                            subtree: true,
+                            attributes: true,
+                            attributeFilter: ['style', 'class']
+                        });
+                    }
+                }
+            }
+
+            async loadProducts() {
+                try {
+                    console.log('Fetching data from:', this.csvUrl);
+                    const response = await fetch(this.csvUrl);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
 
-                    // Finally, sort alphabetically
-                    return a.productname.localeCompare(b.productname);
+                    const csvText = await response.text();
+                    console.log('CSV data received, length:', csvText.length);
+
+                    const data = Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                        transformHeader: (header) => header.trim().toLowerCase()
+                    });
+
+                    console.log('Parsed data:', data);
+
+                    if (data.errors && data.errors.length > 0) {
+                        console.error('Parse errors:', data.errors);
+                    }
+
+                    // Fix: No longer deduplicating by productname. All rows will be displayed.
+                    // A unique 'id' is added to each product for favorites functionality.
+                    this.products = data.data.filter(product => 
+                        product.productname && product.productname.trim()).map((product, index) => {
+                        const processedProduct = {
+                            ...product,
+                            // Add a unique ID for each product/row
+                            id: index,
+                            approxprice: parseFloat(product.approxprice) || 0,
+                            ratings: parseFloat(product.ratings) || 0,
+                            badge: product.badge || '',
+                            featured: product.featured || 'no'
+                        };
+                        return processedProduct;
+                    });
+
+                    console.log('Processed total products:', this.products.length);
+
+                    if (this.products.length === 0) {
+                        throw new Error('No valid products found in the data');
+                    }
+
+                    // To ensure category tabs only show unique category names, we still use a Set.
+                    const uniqueCategories = new Set();
+                    this.products.forEach(p => {
+                        if (p.category) {
+                            uniqueCategories.add(p.category);
+                        }
+                    });
+                    this.categories = uniqueCategories;
+
+                    this.filteredProducts = [...this.products];
+
+                    console.log('Categories found:', Array.from(this.categories));
+                } catch (error) {
+                    console.error('Error in loadProducts:', error);
+                    throw error;
+                }
+            }
+
+            setupEventListeners() {
+                const searchInput = document.getElementById('searchInput');
+                const clearSearch = document.getElementById('clearSearch');
+                const sortSelect = document.getElementById('sortPrice');
+                const favoritesToggle = document.getElementById('favoritesToggle');
+
+                searchInput.addEventListener('input', this.debounce(() => this.handleSearch(), 300));
+                clearSearch.addEventListener('click', () => this.clearSearch());
+                sortSelect.addEventListener('change', () => this.handleSort());
+                favoritesToggle.addEventListener('click', () => this.toggleFavorites());
+
+                // Header visibility on scroll
+                window.addEventListener('scroll', () => this.handleHeaderScroll());
+            }
+
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+
+            handleHeaderScroll() {
+                // Only hide header on desktop
+                if (window.innerWidth >= 769) {
+                    const scrollPosition = window.scrollY || document.documentElement.scrollTop;
+                    if (scrollPosition > this.firstRowThreshold) {
+                        this.header.classList.add('hidden');
+                    } else {
+                        this.header.classList.remove('hidden');
+                    }
+                } else {
+                    // Ensure header is always visible on mobile
+                    this.header.classList.remove('hidden');
+                }
+            }
+
+            handleSearch() {
+                const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                const clearSearchBtn = document.getElementById('clearSearch');
+
+                if (searchTerm.trim() === '') {
+                    this.isSearching = false;
+                    clearSearchBtn.style.display = 'none';
+                    this.applyFilters();
+                } else {
+                    this.isSearching = true;
+                    clearSearchBtn.style.display = 'inline-block';
+                    this.clearActiveTab();
+                    this.applyFilters(searchTerm);
+                }
+            }
+
+            clearSearch() {
+                document.getElementById('searchInput').value = '';
+                document.getElementById('clearSearch').style.display = 'none';
+                this.isSearching = false;
+                this.applyFilters();
+            }
+
+            clearActiveTab() {
+                // Clear all active tabs
+                document.querySelectorAll('#categoryTabs button').forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.setAttribute('aria-selected', 'false');
                 });
-                break;
-            case 'low':
-                this.filteredProducts.sort((a, b) => a.approxprice - b.approxprice);
-                break;
-            case 'high':
-                this.filteredProducts.sort((a, b) => b.approxprice - a.approxprice);
-                break;
-            default:
-                this.filteredProducts.sort((a, b) => a.productname.localeCompare(b.productname));
-        }
 
-        this.renderProducts();
-        // The ResizeObserver or MutationObserver will catch this change and send height
-    }
+                // Reset dropdown to default
+                const dropdown = document.getElementById('categoryDropdown');
+                dropdown.value = 'default';
 
-    renderTabs() {
-        const tabContainer = document.getElementById('categoryTabs');
-        const categoryDropdown = document.getElementById('categoryDropdown');
+                // Reset current category
+                this.currentCategory = 'default';
+            }
 
-        tabContainer.innerHTML = '';
-        categoryDropdown.innerHTML = '<option value="default">Categories</option>';
+            handleSort() {
+                const sortValue = document.getElementById('sortPrice').value;
+                this.applySort(sortValue);
+            }
 
-        Array.from(this.categories).sort().forEach(category => {
-            const option = document.createElement('option');
-            option.value = category;
-            option.textContent = category;
-            categoryDropdown.appendChild(option);
-        });
+            toggleFavorites() {
+                this.showingFavorites = !this.showingFavorites;
+                const toggle = document.getElementById('favoritesToggle');
+                const categoryDropdown = document.getElementById('categoryDropdown');
+                const categoryButtons = document.querySelectorAll('#categoryTabs button');
 
-        categoryDropdown.addEventListener('change', (e) => {
-            this.currentCategory = e.target.value;
-            this.applyFilters(document.getElementById('searchInput').value);
-            document.querySelectorAll('#categoryTabs button').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.textContent === e.target.value) {
+                if (this.showingFavorites) {
+                    toggle.textContent = 'Back to Products';
+                    toggle.classList.add('active');
+                    document.getElementById('searchInput').value = '';
+                    this.isSearching = false; // Ensure search is off when showing favorites
+                    this.currentCategory = 'default';
+
+                    if (categoryDropdown) {
+                        categoryDropdown.value = 'default';
+                        categoryDropdown.disabled = true;
+                    }
+                    categoryButtons.forEach(btn => btn.disabled = true);
+
+                    this.clearSearch(); // Clear search input and hide button
+                    this.clearActiveTab(); // Clear active category tab
+                } else {
+                    toggle.textContent = 'Show My Favorites';
+                    toggle.classList.remove('active');
+                    document.getElementById('searchInput').value = '';
+
+                    if (categoryDropdown) {
+                        categoryDropdown.disabled = false;
+                    }
+                    categoryButtons.forEach(btn => btn.disabled = false);
+                }
+
+                this.applyFilters();
+            }
+
+            applyFilters(searchTerm = '') {
+                let filtered = [...this.products];
+
+                if (searchTerm) {
+                    // When searching, ignore category filters and search all products
+                    filtered = filtered.filter(p => 
+                        p.productname.toLowerCase().includes(searchTerm) ||
+                        (p.category && p.category.toLowerCase().includes(searchTerm))
+                    );
+
+                    // Remove duplicates from search results based on productname
+                    const seenProductNames = new Set();
+                    filtered = filtered.filter(product => {
+                        const isDuplicate = seenProductNames.has(product.productname);
+                        seenProductNames.add(product.productname);
+                        return !isDuplicate;
+                    });
+                } else {
+                    // Only apply category filter when not searching
+                    if (this.currentCategory !== 'default' && !this.isSearching) {
+                        filtered = filtered.filter(p => p.category === this.currentCategory);
+                    }
+                }
+
+                if (this.showingFavorites) {
+                    // Updated to filter by the new unique ID
+                    filtered = filtered.filter(p => this.favorites.has(p.id));
+
+                    // Remove duplicates from favorites if any (e.g., if a product was favorited and duplicated in source)
+                    const seenProductNamesFavorites = new Set();
+                    filtered = filtered.filter(product => {
+                        const isDuplicate = seenProductNamesFavorites.has(product.productname);
+                        seenProductNamesFavorites.add(product.productname);
+                        return !isDuplicate;
+                    });
+                }
+
+                this.filteredProducts = filtered;
+                this.applySort(document.getElementById('sortPrice').value);
+            }
+
+            applySort(sortValue) {
+                switch (sortValue) {
+                    case 'featured':
+                        this.filteredProducts.sort((a, b) => {
+                            // First, sort by featured status (yes comes before no)
+                            const aFeatured = a.featured && a.featured.toLowerCase() === 'yes';
+                            const bFeatured = b.featured && b.featured.toLowerCase() === 'yes';
+                            if (aFeatured !== bFeatured) {
+                                return bFeatured ? -1 : 1; // Corrected order: featured (yes) comes before not featured (no)
+                            }
+
+                            // If both have same featured status, sort by badge presence
+                            const aBadge = a.badge && a.badge.trim() !== '';
+                            const bBadge = b.badge && b.badge.trim() !== '';
+                            if (aBadge !== bBadge) {
+                                return bBadge ? -1 : 1; // Corrected order: badge comes before no badge
+                            }
+
+                            // Finally, sort alphabetically
+                            return a.productname.localeCompare(b.productname);
+                        });
+                        break;
+                    case 'low':
+                        this.filteredProducts.sort((a, b) => a.approxprice - b.approxprice);
+                        break;
+                    case 'high':
+                        this.filteredProducts.sort((a, b) => b.approxprice - a.approxprice);
+                        break;
+                    default:
+                        this.filteredProducts.sort((a, b) => a.productname.localeCompare(b.productname));
+                }
+
+                this.renderProducts();
+                // The ResizeObserver or MutationObserver will catch this change and send height
+            }
+
+            renderTabs() {
+                const tabContainer = document.getElementById('categoryTabs');
+                const categoryDropdown = document.getElementById('categoryDropdown');
+
+                tabContainer.innerHTML = '';
+                categoryDropdown.innerHTML = '<option value="default">Categories</option>';
+
+                Array.from(this.categories).sort().forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    categoryDropdown.appendChild(option);
+                });
+
+                categoryDropdown.addEventListener('change', (e) => {
+                    this.currentCategory = e.target.value;
+                    this.applyFilters(document.getElementById('searchInput').value);
+
+                    document.querySelectorAll('#categoryTabs button').forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.textContent === e.target.value) {
+                            btn.classList.add('active');
+                        }
+                    });
+                    // The ResizeObserver or MutationObserver will catch this change and send height
+                });
+
+                Array.from(this.categories).sort().forEach(category => {
+                    const btn = this.createTabButton(category, this.currentCategory === category);
+                    tabContainer.appendChild(btn);
+                });
+            }
+
+            createTabButton(category, isActive) {
+                const btn = document.createElement('button');
+                btn.textContent = category;
+                btn.setAttribute('role', 'tab');
+                btn.setAttribute('aria-selected', isActive);
+
+                if (isActive) {
                     btn.classList.add('active');
                 }
-            });
-            // The ResizeObserver or MutationObserver will catch this change and send height
+
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('#categoryTabs button').forEach(b => {
+                        b.classList.remove('active');
+                        b.setAttribute('aria-selected', 'false');
+                    });
+
+                    btn.classList.add('active');
+                    btn.setAttribute('aria-selected', 'true');
+                    this.currentCategory = category;
+
+                    const dropdown = document.getElementById('categoryDropdown');
+                    dropdown.value = category;
+
+                    this.applyFilters(document.getElementById('searchInput').value);
+                    // The ResizeObserver or MutationObserver will catch this change and send height
+                });
+
+                return btn;
+            }
+
+            renderProducts() {
+                const grid = document.getElementById('product-grid');
+
+                if (this.filteredProducts.length === 0) {
+                    grid.innerHTML = '<div class="no-results">No products found.</div>';
+                    return;
+                }
+
+                grid.innerHTML = '';
+                this.filteredProducts.forEach(product => {
+                    const card = this.createProductCard(product);
+                    grid.appendChild(card);
+                });
+
+                // Important: Re-calling sendIframeHeight here for robustness, in case observers miss something
+                // but it's debounced, so it won't be called too frequently.
+                this.debounce(this.sendIframeHeight.bind(this), 50)();
+            }
+
+            createProductCard(product) {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+
+                const starsHtml = this.generateStarsHtml(product.ratings);
+                // Updated to check favorites by the new unique ID
+                const isFavorite = this.favorites.has(product.id);
+                const hasBadge = product.badge && product.badge.trim() !== '';
+                const favoriteIconClass = isFavorite ? 'fa-solid' : 'fa-regular';
+
+                card.innerHTML = `
+                    ${hasBadge ? `<span class="badge">${product.badge}</span>` : ''}
+                    <i class="favorite fa-heart ${favoriteIconClass} ${isFavorite ? 'active' : ''}" data-product-id="${product.id}" aria-label="Add to favorites"></i>
+                    <img src="${product.imageurl}" alt="${product.productname}" loading="lazy">
+                    <h3 class="product-name">${product.productname}</h3>
+                    <p class="price">${product.approxprice.toFixed(2)}</p>
+                    ${starsHtml ? `<div class="stars">${starsHtml}</div>` : ''}
+                    <a href="${product.link}" target="_blank" rel="noopener noreferrer">Buy Now</a>
+                `;
+
+                // Add event listener to the favorite icon
+                const favoriteIcon = card.querySelector('.favorite');
+                favoriteIcon.addEventListener('click', () => {
+                    // Updated to use the unique ID
+                    this.toggleFavorite(product.id);
+                    this.renderProducts(); // Re-render to update the heart icon
+                });
+
+                return card;
+            }
+
+            generateStarsHtml(rating) {
+                let html = '';
+                const fullStars = Math.floor(rating);
+                const hasHalfStar = rating - fullStars >= 0.5;
+
+                for (let i = 0; i < fullStars; i++) {
+                    html += '<i class="fa-solid fa-star"></i>';
+                }
+
+                if (hasHalfStar) {
+                    html += '<i class="fa-solid fa-star-half-stroke"></i>';
+                }
+
+                const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
+                for (let i = 0; i < emptyStars; i++) {
+                    html += '<i class="fa-regular fa-star"></i>';
+                }
+
+                return html;
+            }
+
+            toggleFavorite(productId) {
+                if (this.favorites.has(productId)) {
+                    this.favorites.delete(productId);
+                } else {
+                    this.favorites.add(productId);
+                }
+
+                // Save to localStorage using the unique ID
+                localStorage.setItem('favorites', JSON.stringify(Array.from(this.favorites)));
+            }
+
+            showLoading() {
+                const grid = document.getElementById('product-grid');
+                grid.innerHTML = '<div class="loading">Loading products...</div>';
+            }
+
+            showError(message) {
+                const grid = document.getElementById('product-grid');
+                grid.innerHTML = `<div class="error">${message}</div>`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new ProductGrid();
         });
-
-        Array.from(this.categories).sort().forEach(category => {
-            const btn = this.createTabButton(category, this.currentCategory === category);
-            tabContainer.appendChild(btn);
-        });
-    }
-
-    createTabButton(category, isActive) {
-        const btn = document.createElement('button');
-        btn.textContent = category;
-        btn.setAttribute('role', 'tab');
-        btn.setAttribute('aria-selected', isActive);
-
-        if (isActive) {
-            btn.classList.add('active');
-        }
-
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('#categoryTabs button').forEach(b => {
-                b.classList.remove('active');
-                b.setAttribute('aria-selected', 'false');
-            });
-            btn.classList.add('active');
-            btn.setAttribute('aria-selected', 'true');
-
-            this.currentCategory = category;
-            const dropdown = document.getElementById('categoryDropdown');
-            dropdown.value = category;
-            this.applyFilters(document.getElementById('searchInput').value);
-            // The ResizeObserver or MutationObserver will catch this change and send height
-        });
-
-        return btn;
-    }
-
-    renderProducts() {
-        const grid = document.getElementById('product-grid');
-
-        if (this.filteredProducts.length === 0) {
-            grid.innerHTML = '<div class="no-results">No products found.</div>';
-            return;
-        }
-
-        grid.innerHTML = '';
-
-        this.filteredProducts.forEach(product => {
-            const card = this.createProductCard(product);
-            grid.appendChild(card);
-        });
-        // Important: Re-calling sendIframeHeight here for robustness, in case observers miss something
-        // but it's debounced, so it won't be called too frequently.
-        this.debounce(this.sendIframeHeight.bind(this), 50)(); 
-    }
-
-    createProductCard(product) {
-        const card = document.createElement('div');
-        card.className = 'product-card';
-
-        const starsHtml = this.generateStarsHtml(product.ratings);
-        const isFavorite = this.favorites.has(product.productname);
-        const hasBadge = product.badge && product.badge.trim() !== '';
-
-        card.innerHTML = `
-            ${hasBadge ? `<span class="badge">${product.badge}</span>` : ''}
-            <span class="favorite ${isFavorite ? 'active' : ''}" role="button" aria-label="Toggle favorite">
-                <i class="fa-${isFavorite ? 'solid' : 'regular'} fa-heart"></i>
-            </span>
-            <img src="${product.imageurl}" alt="${product.productname}" loading="lazy" />
-            <h3>${product.productname}</h3>
-            <div class="stars" aria-label="Rating: ${product.ratings} out of 5 stars">${starsHtml}</div>
-            <p class="price">$${product.approxprice.toFixed(2)}</p>
-            <a href="${product.amazonlink}" target="_blank" rel="noopener noreferrer">Shop Now</a>
-        `;
-
-        card.querySelector('.favorite').addEventListener('click', (e) => {
-            e.preventDefault();
-            this.toggleFavorite(product.productname, e.currentTarget);
-        });
-
-        return card;
-    }
-
-    generateStarsHtml(rating) {
-        const fullStars = Math.floor(rating);
-        const halfStar = rating % 1 >= 0.5;
-        const emptyStars = 5 - fullStars - (halfStar ? 1 : 0);
-
-        let starsHtml = '';
-        for (let i = 0; i < fullStars; i++) {
-            starsHtml += '<i class="fa-solid fa-star"></i>';
-        }
-        if (halfStar) {
-            starsHtml += '<i class="fa-solid fa-star-half-stroke"></i>';
-        }
-        for (let i = 0; i < emptyStars; i++) {
-            starsHtml += '<i class="fa-regular fa-star"></i>';
-        }
-
-        return starsHtml;
-    }
-
-    toggleFavorite(productName, element) {
-        const icon = element.querySelector('i');
-
-        if (this.favorites.has(productName)) {
-            this.favorites.delete(productName);
-            icon.classList.remove('fa-solid');
-            icon.classList.add('fa-regular');
-            element.classList.remove('active');
-        } else {
-            this.favorites.add(productName);
-            icon.classList.remove('fa-regular');
-            icon.classList.add('fa-solid');
-            element.classList.add('active');
-        }
-
-        localStorage.setItem('favorites', JSON.stringify([...this.favorites]));
-
-        // Re-render products if showing favorites and an item is unfavorited
-        if (this.showingFavorites && !this.favorites.has(productName)) {
-            this.applyFilters(document.getElementById('searchInput').value);
-        }
-        // The ResizeObserver or MutationObserver will catch this change and send height
-    }
-
-    showLoading() {
-        document.getElementById('product-grid').innerHTML = '<div class="loading">Loading products...</div>';
-        this.debounce(this.sendIframeHeight.bind(this), 50)(); // Debounced send height when loading
-    }
-
-    showError(message) {
-        document.getElementById('product-grid').innerHTML = `<div class="error">${message}<br><br>Check the browser console for more details.</div>`;
-        this.debounce(this.sendIframeHeight.bind(this), 50)(); // Debounced send height when error
-    }
-}
-
-// Ensure the ProductGrid is initialized after the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    new ProductGrid();
-});
-
-// Fallback for image loading and other asynchronous content
-// This will trigger a height update once all resources are loaded
-window.addEventListener('load', () => {
-    console.log('GitHub Page: window loaded, sending final height after all resources.');
-    // Get the instance of ProductGrid and call sendIframeHeight
-    // This assumes ProductGrid has been initialized on DOMContentLoaded
-    const productGridInstance = window.productGrid; // We will make it globally accessible for this.
-    if (productGridInstance) {
-        productGridInstance.sendIframeHeight();
-    }
-});
-</script>
-
+    </script>
 </body>
 </html>
-
-
