@@ -929,7 +929,8 @@
                     <h3 class="product-name">${product.productname}</h3>
                     <p class="price">${product.approxprice.toFixed(2)}</p>
                     ${starsHtml ? `<div class="stars">${starsHtml}</div>` : ''}
-                    <a href="${product.link}" target="_blank" rel="noopener noreferrer">Buy Now</a>
+                     <a href="${product.amazonlink}" target="_blank" rel="noopener noreferrer">Shop Now</a>
+
                 `;
 
                 // Add event listener to the favorite icon
@@ -992,3 +993,4 @@
     </script>
 </body>
 </html>
+
