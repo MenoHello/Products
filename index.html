@@ -505,31 +505,100 @@
                 } catch (error) {
                     console.error('Error loading products:', error);
                     this.showError(`
- <div id="fallback-message" style="background-color:#ffe9e5; padding:40px 20px; border-radius:20px; text-align:center; font-family:Poppins, sans-serif; color:#000; opacity:0; transition: opacity 0.8s ease; max-width:700px; margin:0 auto;">
-  <h2 style="margin-top:0; font-size:26px; line-height:1.4;">
+<div id="fallback-message" 
+     style="background-color:#ffe9e5; 
+            padding:40px 20px; 
+            border-radius:20px; 
+            text-align:center; 
+            font-family:Poppins, sans-serif; 
+            color:#000; 
+            opacity:0; 
+            transition:opacity 0.8s ease; 
+            max-width:800px; 
+            margin:40px auto; 
+            box-sizing:border-box;">
+
+  <h2 style="margin-top:0; font-size:28px; line-height:1.4; margin-bottom:20px;">
     Looks like our products are having a little meltdown of their own!
   </h2>
-  <p style="font-size:18px; max-width:600px; margin:0 auto 30px auto; line-height:1.6;">
+
+  <p style="font-size:18px; max-width:650px; margin:0 auto 40px auto; line-height:1.6;">
     While we fix this glitch, you can still explore helpful resources to support your menopause journey.
   </p>
   
-  <div style="display:flex; flex-direction:column; gap:16px; max-width:400px; margin:0 auto;">
+  <div style="display:flex; flex-direction:column; gap:16px; max-width:650px; margin:0 auto; flex-wrap:wrap; justify-content:center;">
     <a href="https://www.menohello.com/menopause-resources/menopause-video-library" 
-       style="background-color:#ffa798; color:#000; text-decoration:none; padding:14px 20px; border-radius:12px; font-size:16px; font-weight:500; display:block;">
+       style="background-color:#ffa798; 
+              color:#000; 
+              text-decoration:none; 
+              padding:16px 20px; 
+              border-radius:12px; 
+              font-size:16px; 
+              font-weight:500; 
+              display:block; 
+              box-shadow:0 2px 5px rgba(0,0,0,0.1); 
+              transition:all 0.3s ease;">
        🎥 Check Out Our Menopause and Perimenopause Video Library
     </a>
     
     <a href="https://www.menohello.com/menopause-resources/hrt-price-checker-tool" 
-       style="background-color:#ffa798; color:#000; text-decoration:none; padding:14px 20px; border-radius:12px; font-size:16px; font-weight:500; display:block;">
-       💊 Save Big on Your Prescriptions - Check HRT Prices
+       style="background-color:#ffa798; 
+              color:#000; 
+              text-decoration:none; 
+              padding:16px 20px; 
+              border-radius:12px; 
+              font-size:16px; 
+              font-weight:500; 
+              display:block; 
+              box-shadow:0 2px 5px rgba(0,0,0,0.1); 
+              transition:all 0.3s ease;">
+       💊 Save Big on Your Prescriptions – Check HRT Prices
     </a>
     
     <a href="https://www.menohello.com/menopause-toolkit/wellness-diary" 
-       style="background-color:#ffa798; color:#000; text-decoration:none; padding:14px 20px; border-radius:12px; font-size:16px; font-weight:500; display:block;">
+       style="background-color:#ffa798; 
+              color:#000; 
+              text-decoration:none; 
+              padding:16px 20px; 
+              border-radius:12px; 
+              font-size:16px; 
+              font-weight:500; 
+              display:block; 
+              box-shadow:0 2px 5px rgba(0,0,0,0.1); 
+              transition:all 0.3s ease;">
        ✍️ Start Your Menopause or Perimenopause Wellness Diary
     </a>
   </div>
 </div>
+
+<style>
+  /* Center whole section inside product grid */
+  #product-grid {
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:60vh; /* adjust as needed */
+  }
+
+  /* Hover effects for buttons */
+  #fallback-message a:hover {
+    background-color:#ffd2cb;
+    box-shadow:0 6px 12px rgba(0,0,0,0.15);
+    transform:translateY(-2px);
+  }
+
+  /* Side-by-side buttons on larger screens */
+  @media (min-width: 768px) {
+    #fallback-message div {
+      flex-direction:row;
+    }
+    #fallback-message a {
+      flex:1;
+      text-align:center;
+    }
+  }
+</style>
+
 `);
      requestAnimationFrame(() => {
   const fallback = document.getElementById('fallback-message');
@@ -1024,5 +1093,6 @@
     </script>
 </body>
 </html>
+
 
 
