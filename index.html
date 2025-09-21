@@ -505,29 +505,31 @@
                 } catch (error) {
                     console.error('Error loading products:', error);
                     this.showError(`
-  <div id="fallback-message" style="background-color:#ffe9e5; padding:30px; border-radius:20px; text-align:center; font-family:Poppins, sans-serif; color:#000; opacity:0; transition: opacity 0.8s ease;">
-    <h2 style="margin-top:0; font-size:24px;">Looks like our products are having a little hot flash</h2>
-    <p style="font-size:16px; max-width:500px; margin:0 auto 20px auto;">
-      While we fix this glitch, you can still explore helpful resources to support your menopause journey.
-    </p>
+ <div id="fallback-message" style="background-color:#ffe9e5; padding:40px 20px; border-radius:20px; text-align:center; font-family:Poppins, sans-serif; color:#000; opacity:0; transition: opacity 0.8s ease; max-width:700px; margin:0 auto;">
+  <h2 style="margin-top:0; font-size:26px; line-height:1.4;">
+    Looks like our products are having a little hot flash
+  </h2>
+  <p style="font-size:18px; max-width:600px; margin:0 auto 30px auto; line-height:1.6;">
+    While we fix this glitch, you can still explore helpful resources to support your menopause journey.
+  </p>
+  
+  <div style="display:flex; flex-direction:column; gap:16px; max-width:400px; margin:0 auto;">
+    <a href="https://www.menohello.com/menopause-resources/menopause-video-library" 
+       style="background-color:#ffa798; color:#000; text-decoration:none; padding:14px 20px; border-radius:12px; font-size:16px; font-weight:500; display:block;">
+       🎥 Watch Our Menopause Video Library
+    </a>
     
-    <div style="display:flex; flex-direction:column; gap:12px; max-width:300px; margin:0 auto;">
-      <a href="https://www.menohello.com/menopause-resources/menopause-video-library" 
-         style="background-color:#ffa798; color:#000; text-decoration:none; padding:12px 20px; border-radius:12px; font-size:16px; font-weight:500; display:block;">
-         🎥 Watch Our Menopause Video Library
-      </a>
-      
-      <a href="https://www.menohello.com/menopause-resources/hrt-price-checker-tool" 
-         style="background-color:#ffa798; color:#000; text-decoration:none; padding:12px 20px; border-radius:12px; font-size:16px; font-weight:500; display:block;">
-         💊 Check HRT Prices
-      </a>
-      
-      <a href="https://www.menohello.com/menopause-toolkit/wellness-diary" 
-         style="background-color:#ffa798; color:#000; text-decoration:none; padding:12px 20px; border-radius:12px; font-size:16px; font-weight:500; display:block;">
-         ✍️ Start Your Wellness Diary
-      </a>
-    </div>
+    <a href="https://www.menohello.com/menopause-resources/hrt-price-checker-tool" 
+       style="background-color:#ffa798; color:#000; text-decoration:none; padding:14px 20px; border-radius:12px; font-size:16px; font-weight:500; display:block;">
+       💊 Check HRT Prices
+    </a>
+    
+    <a href="https://www.menohello.com/menopause-toolkit/wellness-diary" 
+       style="background-color:#ffa798; color:#000; text-decoration:none; padding:14px 20px; border-radius:12px; font-size:16px; font-weight:500; display:block;">
+       ✍️ Start Your Wellness Diary
+    </a>
   </div>
+</div>
 `);
      requestAnimationFrame(() => {
   const fallback = document.getElementById('fallback-message');
@@ -1022,3 +1024,4 @@
     </script>
 </body>
 </html>
+
